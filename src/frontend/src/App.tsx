@@ -77,12 +77,13 @@ function App() {
           />
           
           {/* Content */}
-          <div className="relative z-10 container mx-auto px-4 py-6">
-            <div className="flex items-center gap-3 mb-12 md:mb-16">
-              <Shield className="w-10 h-10 md:w-12 md:h-12 text-primary" />
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-primary tracking-tight">
-                CERC Fortaleza
-              </h2>
+          <div className="relative z-10 container mx-auto px-4 py-8 md:py-12">
+            <div className="flex justify-center mb-10 md:mb-14">
+              <img 
+                src="/assets/uploads/LOGO-COM-NOME-1.png" 
+                alt="CERC FORTALEZA - Cadastro de Eletrônicos e Registros Ceará"
+                className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto"
+              />
             </div>
 
             <div className="max-w-5xl mx-auto text-center pb-12 md:pb-16">
@@ -124,7 +125,7 @@ function App() {
                     <Shield className="w-10 h-10 text-primary" />
                   </div>
                   <p className="text-foreground/70 text-lg">
-                    Obrigado por confiar na CERC Fortaleza!
+                    Obrigado por confiar no CERC FORTALEZA!
                   </p>
                 </div>
               ) : (
@@ -266,7 +267,7 @@ function App() {
             {/* Copyright */}
             <div className="text-center pt-6 border-t border-border">
               <p className="text-sm text-muted-foreground">
-                © 2026 CERC Fortaleza. Todos os direitos reservados.
+                © 2026 CERC FORTALEZA - Cadastro de Eletrônicos e Registros Ceará. Todos os direitos reservados.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
                 Built with love using{" "}
