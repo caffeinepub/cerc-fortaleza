@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Crown, CheckCircle2, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,48 +26,57 @@ export function CheckoutSuccessPage() {
   const [isProcessing, setIsProcessing] = useState(true);
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [expirationDate, setExpirationDate] = useState<Date | null>(null);
+  const [processingTimeout, setProcessingTimeout] = useState(false);
 
   const { mutateAsync: getSessionStatus } = useGetStripeSessionStatus();
   const { mutateAsync: upgradeToPremium } = useUpgradeToPremium();
 
-  useEffect(() => {
-    processPayment();
-  }, []);
-
-  const processPayment = async () => {
+  const processPayment = useCallback(async () => {
+    console.log("🔵 [CheckoutSuccess] Iniciando processamento de pagamento...");
+    
     try {
       // Extract session_id and plan from URL
       const sessionId = (search as { session_id?: string })?.session_id;
       const planParam = (search as { plan?: string })?.plan as PlanType | undefined;
 
-      if (!sessionId) {
-        setProcessingError("ID da sessão não encontrado");
+      console.log("🔵 [CheckoutSuccess] Parâmetros da URL:", { sessionId, planParam });
+
+      // Validar session_id
+      if (!sessionId || sessionId.trim() === "" || sessionId === "{CHECKOUT_SESSION_ID}") {
+        console.error("🔴 [CheckoutSuccess] Session ID inválido ou faltando");
+        setProcessingError("ID da sessão de pagamento não encontrado. Verifique o link recebido.");
         setIsProcessing(false);
         return;
       }
 
+      // Validar planParam
       if (!planParam || (planParam !== "monthly" && planParam !== "annual")) {
-        setProcessingError("Plano inválido");
+        console.error("🔴 [CheckoutSuccess] Plano inválido:", planParam);
+        setProcessingError("Plano de assinatura inválido. Entre em contato com o suporte.");
         setIsProcessing(false);
         return;
       }
 
       // Get session status from Stripe
+      console.log("🔵 [CheckoutSuccess] Consultando status da sessão Stripe...");
       const sessionStatus = await getSessionStatus(sessionId);
+      console.log("🔵 [CheckoutSuccess] Status retornado:", sessionStatus);
 
       if (sessionStatus.__kind__ === "failed") {
         const errorMsg = "error" in sessionStatus.failed 
           ? sessionStatus.failed.error 
-          : "Pagamento falhou";
+          : "Pagamento falhou - status desconhecido";
+        console.error("🔴 [CheckoutSuccess] Pagamento falhou:", errorMsg);
         setProcessingError(errorMsg);
         setIsProcessing(false);
-        toast.error("Falha no pagamento: " + errorMsg);
+        toast.error("Falha no pagamento: " + errorMsg, { duration: 6000 });
         return;
       }
 
       // Payment completed successfully
       if (sessionStatus.__kind__ === "completed") {
         const customerIdFromResponse = sessionStatus.completed.response;
+        console.log("🟢 [CheckoutSuccess] Pagamento confirmado! Customer ID:", customerIdFromResponse);
         
         // Calculate expiration date
         const now = Date.now();
@@ -75,7 +84,14 @@ export function CheckoutSuccessPage() {
         const expirationMs = now + durationMs;
         const expirationNs = BigInt(expirationMs * 1_000_000); // Convert to nanoseconds
         
+        console.log("🔵 [CheckoutSuccess] Calculando expiração:", {
+          now: new Date(now).toISOString(),
+          durationMs,
+          expiration: new Date(expirationMs).toISOString(),
+        });
+        
         // Upgrade to premium
+        console.log("🔵 [CheckoutSuccess] Ativando assinatura Premium...");
         const subscriptionPlan = PLAN_MAPPING[planParam];
         await upgradeToPremium({
           plan: subscriptionPlan,
@@ -83,22 +99,38 @@ export function CheckoutSuccessPage() {
           expirationDate: expirationNs,
         });
 
+        console.log("🟢 [CheckoutSuccess] Assinatura Premium ativada com sucesso!");
+
         // Set expiration date for display
         setExpirationDate(new Date(expirationMs));
         setIsProcessing(false);
-        toast.success("Assinatura Premium ativada com sucesso!");
+        toast.success("🎉 Assinatura Premium ativada com sucesso!", { duration: 5000 });
       } else {
-        setProcessingError("Status de pagamento desconhecido");
+        console.error("🔴 [CheckoutSuccess] Status desconhecido:", sessionStatus);
+        setProcessingError("Status de pagamento não reconhecido. Entre em contato com o suporte.");
         setIsProcessing(false);
       }
     } catch (error) {
-      console.error("Error processing payment:", error);
-      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      console.error("🔴 [CheckoutSuccess] Erro no processamento:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido ao processar pagamento";
       setProcessingError(errorMessage);
       setIsProcessing(false);
-      toast.error("Erro ao processar pagamento: " + errorMessage);
+      toast.error("Erro ao processar pagamento: " + errorMessage, { duration: 6000 });
     }
-  };
+  }, [search, getSessionStatus, upgradeToPremium]);
+
+  useEffect(() => {
+    // Timeout de segurança: 30 segundos
+    const timeoutId = setTimeout(() => {
+      setProcessingTimeout(true);
+      setProcessingError("Tempo limite excedido. Entre em contato com o suporte.");
+      setIsProcessing(false);
+    }, 30000); // 30 segundos
+
+    processPayment();
+
+    return () => clearTimeout(timeoutId);
+  }, [processPayment]);
 
   const formatExpirationDate = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, "0");
@@ -146,11 +178,17 @@ export function CheckoutSuccessPage() {
               </div>
               <div className="space-y-3">
                 <h2 className="text-2xl md:text-3xl font-display font-bold text-red-600">
-                  Erro no Pagamento
+                  {processingTimeout ? "Timeout no Processamento" : "Erro no Pagamento"}
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
                   {processingError}
                 </p>
+                {processingTimeout && (
+                  <p className="text-sm text-muted-foreground">
+                    O processamento demorou mais de 30 segundos. Verifique seu painel de assinaturas 
+                    ou entre em contato com o suporte.
+                  </p>
+                )}
               </div>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button

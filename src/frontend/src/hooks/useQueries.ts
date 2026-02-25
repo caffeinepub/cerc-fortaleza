@@ -217,6 +217,20 @@ export type CheckoutSession = {
   url: string;
 };
 
+export function useIsStripeConfigured() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ["isStripeConfigured"],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isStripeConfigured();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 60000, // Cache por 1 minuto
+  });
+}
+
 export function useMySubscription() {
   const { actor, isFetching } = useActor();
 

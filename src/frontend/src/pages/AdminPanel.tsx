@@ -58,7 +58,7 @@ export function AdminPanel() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-4">
               <img
-                src="/assets/uploads/LOGO-COM-NOME-1.png"
+                src="/assets/uploads/LOGO-BRANCO-1.png"
                 alt="CERC FORTALEZA"
                 className="w-auto h-12 md:h-14"
               />

@@ -68,7 +68,7 @@ export function OnboardingPage() {
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <img 
-            src="/assets/uploads/LOGO-COM-NOME-1.png" 
+            src="/assets/uploads/LOGO-BRANCO-1.png" 
             alt="CERC FORTALEZA"
             className="w-full max-w-xs h-auto"
           />

@@ -96,7 +96,7 @@ export function LandingPage() {
         <div className="relative z-10 container mx-auto px-4 py-8 md:py-12">
           <div className="flex justify-center mb-10 md:mb-14">
             <img 
-              src="/assets/uploads/LOGO-COM-NOME-1.png" 
+              src="/assets/uploads/LOGO-BRANCO-1.png" 
               alt="CERC FORTALEZA - Cadastro de Eletrônicos e Registros Ceará"
               className="w-full max-w-xs sm:max-w-sm md:max-w-md h-auto"
             />

@@ -58,7 +58,7 @@ export function SearchTab() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-center mb-4">
             <img 
-              src="/assets/uploads/LOGO-COM-NOME-1.png" 
+              src="/assets/uploads/LOGO-BRANCO-1.png" 
               alt="CERC FORTALEZA"
               className="h-12 w-auto"
             />

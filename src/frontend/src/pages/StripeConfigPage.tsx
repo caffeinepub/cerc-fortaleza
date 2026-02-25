@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Settings, CheckCircle2, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
+import { Settings, CheckCircle2, AlertCircle, Loader2, ArrowLeft, ExternalLink, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -108,7 +108,58 @@ export function StripeConfigPage() {
       </header>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8 md:py-12 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 md:py-12 max-w-3xl">
+        {/* Instruções em Destaque */}
+        <Card className="mb-6 border-2 border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20">
+          <CardHeader>
+            <div className="flex items-start gap-3">
+              <Info className="w-6 h-6 text-blue-600 dark:text-blue-400 shrink-0 mt-1" />
+              <div className="space-y-3">
+                <CardTitle className="text-xl font-display text-blue-900 dark:text-blue-100">
+                  Como configurar o Stripe (Passo a Passo)
+                </CardTitle>
+                <div className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
+                  <p className="flex items-start gap-2">
+                    <span className="font-bold text-blue-600 dark:text-blue-400">1.</span>
+                    <span>
+                      Acesse o{" "}
+                      <a
+                        href="https://dashboard.stripe.com/register"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline font-bold hover:text-blue-900 inline-flex items-center gap-1"
+                      >
+                        Dashboard do Stripe
+                        <ExternalLink className="w-3 h-3" />
+                      </a>{" "}
+                      e crie uma conta (se ainda não tiver)
+                    </span>
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="font-bold text-blue-600 dark:text-blue-400">2.</span>
+                    <span>
+                      Vá em <strong>Developers → API keys</strong> no menu lateral
+                    </span>
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="font-bold text-blue-600 dark:text-blue-400">3.</span>
+                    <span>
+                      Copie a <strong>Secret key</strong> (começa com <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">sk_test_</code> para testes)
+                    </span>
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="font-bold text-blue-600 dark:text-blue-400">4.</span>
+                    <span>
+                      Cole a chave abaixo e clique em <strong>Salvar Configuração</strong>
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Card Principal */}
         <Card className="border-2 border-primary/20 shadow-2xl">
           <CardHeader className="text-center space-y-3 border-b">
             <div className="w-16 h-16 mx-auto bg-primary rounded-full flex items-center justify-center">
@@ -152,20 +203,34 @@ export function StripeConfigPage() {
           </CardHeader>
 
           <CardContent className="space-y-6 pt-8 pb-8">
-            {/* Info Alert */}
-            <div className="bg-blue-50 dark:bg-blue-950/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <p className="text-sm text-blue-600 dark:text-blue-400 leading-relaxed">
-                ℹ️ Você precisa criar uma conta Stripe e obter sua <strong>Secret Key</strong> no
-                dashboard em{" "}
-                <a
-                  href="https://dashboard.stripe.com/apikeys"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline font-bold hover:text-blue-700"
+            {/* Quick Link */}
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/30 rounded-lg p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    Acesso Rápido ao Dashboard Stripe
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Obtenha sua Secret Key em segundos
+                  </p>
+                </div>
+                <Button
+                  asChild
+                  variant="default"
+                  className="bg-primary hover:bg-primary/90 shrink-0"
+                  size="sm"
                 >
-                  dashboard.stripe.com/apikeys
-                </a>
-              </p>
+                  <a
+                    href="https://dashboard.stripe.com/apikeys"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2"
+                  >
+                    Abrir Dashboard
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+              </div>
             </div>
 
             {/* Form */}

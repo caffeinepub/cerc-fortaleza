@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Crown, Check, Loader2, ArrowLeft } from "lucide-react";
+import { Crown, Check, Loader2, ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { useCreateCheckoutSession } from "@/hooks/useQueries";
+import { useCreateCheckoutSession, useIsStripeConfigured } from "@/hooks/useQueries";
 import type { ShoppingItem } from "@/backend.d";
 
 type PlanType = "monthly" | "annual";
@@ -45,6 +46,7 @@ export function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { mutateAsync: createCheckoutSession } = useCreateCheckoutSession();
+  const { data: isStripeConfigured, isLoading: isCheckingStripe } = useIsStripeConfigured();
 
   useEffect(() => {
     // Read plan from query params
@@ -55,6 +57,14 @@ export function CheckoutPage() {
   }, [search]);
 
   const handleCheckout = async () => {
+    // Validação: verificar se Stripe está configurado
+    if (!isStripeConfigured) {
+      toast.error("Sistema de pagamento não configurado. Entre em contato com o suporte.", {
+        duration: 5000,
+      });
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const planConfig = PLAN_CONFIG[plan];
@@ -72,24 +82,43 @@ export function CheckoutPage() {
       const successUrl = `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`;
       const cancelUrl = `${baseUrl}/checkout?plan=${plan}`;
 
+      console.log("🔵 [Checkout] Criando sessão Stripe...", { plan, baseUrl });
+
       const session = await createCheckoutSession({ items: shoppingItems, successUrl, cancelUrl });
 
+      console.log("🟢 [Checkout] Sessão criada com sucesso:", { sessionId: session.id });
+
       if (!session?.url) {
-        throw new Error("Stripe session missing url");
+        throw new Error("URL da sessão Stripe não foi retornada");
       }
 
       // Redirect to Stripe checkout
+      console.log("🔵 [Checkout] Redirecionando para Stripe...");
       window.location.href = session.url;
     } catch (error) {
-      console.error("Checkout error:", error);
+      console.error("🔴 [Checkout] Erro ao criar sessão:", error);
       
-      // Check if error is related to Stripe configuration
+      // Mensagens de erro claras e específicas
       const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.includes("not configured") || errorMessage.includes("Stripe")) {
-        toast.error("Sistema de pagamento não configurado. Entre em contato com o suporte.");
+      
+      if (errorMessage.toLowerCase().includes("not configured") || errorMessage.toLowerCase().includes("stripe not set")) {
+        toast.error("Sistema de pagamento não configurado. Entre em contato com o administrador.", {
+          duration: 6000,
+        });
+      } else if (errorMessage.toLowerCase().includes("network") || errorMessage.toLowerCase().includes("fetch")) {
+        toast.error("Erro de conexão. Verifique sua internet e tente novamente.", {
+          duration: 5000,
+        });
+      } else if (errorMessage.toLowerCase().includes("session")) {
+        toast.error("Erro ao criar sessão de pagamento. Tente novamente em alguns instantes.", {
+          duration: 5000,
+        });
       } else {
-        toast.error("Erro ao processar pagamento. Tente novamente.");
+        toast.error(`Erro ao processar pagamento: ${errorMessage}`, {
+          duration: 5000,
+        });
       }
+      
       setIsProcessing(false);
     }
   };
@@ -122,6 +151,17 @@ export function CheckoutPage() {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+        {/* Stripe Not Configured Warning */}
+        {!isCheckingStripe && !isStripeConfigured && (
+          <Alert className="mb-6 border-2 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20">
+            <AlertCircle className="h-5 w-5 text-yellow-600" />
+            <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+              <strong>Sistema de pagamento indisponível.</strong> O Stripe ainda não foi configurado. 
+              Entre em contato com o administrador para ativar as assinaturas Premium.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Plan Selection */}
         <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card
@@ -237,13 +277,23 @@ export function CheckoutPage() {
             {/* Checkout Button */}
             <Button
               onClick={handleCheckout}
-              disabled={isProcessing}
-              className="w-full h-14 text-base md:text-lg font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
+              disabled={isProcessing || isCheckingStripe || !isStripeConfigured}
+              className="w-full h-14 text-base md:text-lg font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isProcessing ? (
+              {isCheckingStripe ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Verificando sistema...
+                </>
+              ) : isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Processando...
+                </>
+              ) : !isStripeConfigured ? (
+                <>
+                  <AlertCircle className="mr-2 h-5 w-5" />
+                  Sistema Indisponível
                 </>
               ) : (
                 <>
