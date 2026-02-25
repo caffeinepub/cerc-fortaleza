@@ -8,29 +8,453 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
+export const ShoppingItem = IDL.Record({
+  'productName' : IDL.Text,
+  'currency' : IDL.Text,
+  'quantity' : IDL.Nat,
+  'priceInCents' : IDL.Nat,
+  'productDescription' : IDL.Text,
+});
+export const TheftInfo = IDL.Record({
+  'latitude' : IDL.Int,
+  'latitudeStart' : IDL.Opt(IDL.Int),
+  'date' : IDL.Int,
+  'stolenPlace' : IDL.Opt(IDL.Text),
+  'reportDate' : IDL.Int,
+  'longitude' : IDL.Int,
+  'boNumber' : IDL.Text,
+  'longitudeStart' : IDL.Opt(IDL.Int),
+  'location' : IDL.Text,
+});
+export const ObjectStatus = IDL.Variant({
+  'stolen' : TheftInfo,
+  'safe' : IDL.Null,
+});
+export const ObjectType = IDL.Variant({
+  'other' : IDL.Text,
+  'bike' : IDL.Null,
+  'notebook' : IDL.Null,
+  'phone' : IDL.Null,
+});
+export const PersonalObject = IDL.Record({
+  'id' : IDL.Nat,
+  'status' : ObjectStatus,
+  'model' : IDL.Text,
+  'owner' : IDL.Principal,
+  'createdAt' : IDL.Int,
+  'objType' : ObjectType,
+  'brand' : IDL.Text,
+  'identifier' : IDL.Text,
+});
 export const Lead = IDL.Record({
   'name' : IDL.Text,
   'whatsapp' : IDL.Text,
   'timestamp' : IDL.Int,
 });
+export const FoundObject = IDL.Record({
+  'id' : IDL.Nat,
+  'status' : IDL.Variant({ 'claimed' : IDL.Null, 'available' : IDL.Null }),
+  'createdAt' : IDL.Int,
+  'description' : IDL.Text,
+  'finder' : IDL.Principal,
+  'location' : IDL.Text,
+});
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const SubscriptionPlan = IDL.Variant({
+  'premiumMonthly' : IDL.Null,
+  'free' : IDL.Null,
+  'premiumAnnual' : IDL.Null,
+});
+export const SubscriptionInfo = IDL.Record({
+  'isExpired' : IDL.Bool,
+  'plan' : SubscriptionPlan,
+  'expirationDate' : IDL.Opt(IDL.Int),
+  'objectCount' : IDL.Nat,
+  'objectLimit' : IDL.Nat,
+});
+export const PublicStats = IDL.Record({
+  'totalRecovered' : IDL.Nat,
+  'totalObjects' : IDL.Nat,
+  'totalStolen' : IDL.Nat,
+});
+export const LeadStats = IDL.Record({
+  'today' : IDL.Nat,
+  'total' : IDL.Nat,
+  'thisWeek' : IDL.Nat,
+});
+export const StripeSessionStatus = IDL.Variant({
+  'completed' : IDL.Record({
+    'userPrincipal' : IDL.Opt(IDL.Text),
+    'response' : IDL.Text,
+  }),
+  'failed' : IDL.Record({ 'error' : IDL.Text }),
+});
+export const StripeConfiguration = IDL.Record({
+  'allowedCountries' : IDL.Vec(IDL.Text),
+  'secretKey' : IDL.Text,
+});
+export const http_header = IDL.Record({
+  'value' : IDL.Text,
+  'name' : IDL.Text,
+});
+export const http_request_result = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
+});
+export const TransformationInput = IDL.Record({
+  'context' : IDL.Vec(IDL.Nat8),
+  'response' : http_request_result,
+});
+export const TransformationOutput = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
+});
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addFoundObject' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'canRegisterMoreObjects' : IDL.Func([], [IDL.Bool], ['query']),
+  'claimFoundObject' : IDL.Func([IDL.Nat], [], []),
+  'createCheckoutSession' : IDL.Func(
+      [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
+      [IDL.Text],
+      [],
+    ),
+  'findMoreObjects' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(PersonalObject)],
+      ['query'],
+    ),
   'getAllLeads' : IDL.Func([], [IDL.Vec(Lead)], ['query']),
+  'getAvailableFoundObjects' : IDL.Func([], [IDL.Vec(FoundObject)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getMyObjects' : IDL.Func([], [IDL.Vec(PersonalObject)], ['query']),
+  'getMySubscription' : IDL.Func([], [SubscriptionInfo], ['query']),
+  'getObjectById' : IDL.Func([IDL.Nat], [IDL.Opt(PersonalObject)], ['query']),
+  'getObjectsByStatus' : IDL.Func(
+      [ObjectStatus],
+      [IDL.Vec(PersonalObject)],
+      ['query'],
+    ),
+  'getObjectsByType' : IDL.Func(
+      [ObjectType],
+      [IDL.Vec(PersonalObject)],
+      ['query'],
+    ),
+  'getPublicStats' : IDL.Func([], [PublicStats], ['query']),
+  'getStats' : IDL.Func([], [LeadStats], ['query']),
+  'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+  'promoteToAdmin' : IDL.Func([IDL.Principal], [], []),
+  'publicObjectSearch' : IDL.Func([IDL.Text], [IDL.Text], ['query']),
+  'registerObject' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text, ObjectType],
+      [IDL.Nat],
+      [],
+    ),
+  'reportTheft' : IDL.Func(
+      [
+        IDL.Nat,
+        IDL.Text,
+        IDL.Int,
+        IDL.Int,
+        IDL.Int,
+        IDL.Text,
+        IDL.Opt(IDL.Text),
+        IDL.Opt(IDL.Int),
+        IDL.Opt(IDL.Int),
+      ],
+      [],
+      [],
+    ),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
   'submitLead' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'transform' : IDL.Func(
+      [TransformationInput],
+      [TransformationOutput],
+      ['query'],
+    ),
+  'upgradeToPremium' : IDL.Func([SubscriptionPlan, IDL.Text, IDL.Int], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
+  const ShoppingItem = IDL.Record({
+    'productName' : IDL.Text,
+    'currency' : IDL.Text,
+    'quantity' : IDL.Nat,
+    'priceInCents' : IDL.Nat,
+    'productDescription' : IDL.Text,
+  });
+  const TheftInfo = IDL.Record({
+    'latitude' : IDL.Int,
+    'latitudeStart' : IDL.Opt(IDL.Int),
+    'date' : IDL.Int,
+    'stolenPlace' : IDL.Opt(IDL.Text),
+    'reportDate' : IDL.Int,
+    'longitude' : IDL.Int,
+    'boNumber' : IDL.Text,
+    'longitudeStart' : IDL.Opt(IDL.Int),
+    'location' : IDL.Text,
+  });
+  const ObjectStatus = IDL.Variant({ 'stolen' : TheftInfo, 'safe' : IDL.Null });
+  const ObjectType = IDL.Variant({
+    'other' : IDL.Text,
+    'bike' : IDL.Null,
+    'notebook' : IDL.Null,
+    'phone' : IDL.Null,
+  });
+  const PersonalObject = IDL.Record({
+    'id' : IDL.Nat,
+    'status' : ObjectStatus,
+    'model' : IDL.Text,
+    'owner' : IDL.Principal,
+    'createdAt' : IDL.Int,
+    'objType' : ObjectType,
+    'brand' : IDL.Text,
+    'identifier' : IDL.Text,
+  });
   const Lead = IDL.Record({
     'name' : IDL.Text,
     'whatsapp' : IDL.Text,
     'timestamp' : IDL.Int,
   });
+  const FoundObject = IDL.Record({
+    'id' : IDL.Nat,
+    'status' : IDL.Variant({ 'claimed' : IDL.Null, 'available' : IDL.Null }),
+    'createdAt' : IDL.Int,
+    'description' : IDL.Text,
+    'finder' : IDL.Principal,
+    'location' : IDL.Text,
+  });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const SubscriptionPlan = IDL.Variant({
+    'premiumMonthly' : IDL.Null,
+    'free' : IDL.Null,
+    'premiumAnnual' : IDL.Null,
+  });
+  const SubscriptionInfo = IDL.Record({
+    'isExpired' : IDL.Bool,
+    'plan' : SubscriptionPlan,
+    'expirationDate' : IDL.Opt(IDL.Int),
+    'objectCount' : IDL.Nat,
+    'objectLimit' : IDL.Nat,
+  });
+  const PublicStats = IDL.Record({
+    'totalRecovered' : IDL.Nat,
+    'totalObjects' : IDL.Nat,
+    'totalStolen' : IDL.Nat,
+  });
+  const LeadStats = IDL.Record({
+    'today' : IDL.Nat,
+    'total' : IDL.Nat,
+    'thisWeek' : IDL.Nat,
+  });
+  const StripeSessionStatus = IDL.Variant({
+    'completed' : IDL.Record({
+      'userPrincipal' : IDL.Opt(IDL.Text),
+      'response' : IDL.Text,
+    }),
+    'failed' : IDL.Record({ 'error' : IDL.Text }),
+  });
+  const StripeConfiguration = IDL.Record({
+    'allowedCountries' : IDL.Vec(IDL.Text),
+    'secretKey' : IDL.Text,
+  });
+  const http_header = IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text });
+  const http_request_result = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
+  });
+  const TransformationInput = IDL.Record({
+    'context' : IDL.Vec(IDL.Nat8),
+    'response' : http_request_result,
+  });
+  const TransformationOutput = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
+  });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addFoundObject' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'canRegisterMoreObjects' : IDL.Func([], [IDL.Bool], ['query']),
+    'claimFoundObject' : IDL.Func([IDL.Nat], [], []),
+    'createCheckoutSession' : IDL.Func(
+        [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
+        [IDL.Text],
+        [],
+      ),
+    'findMoreObjects' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(PersonalObject)],
+        ['query'],
+      ),
     'getAllLeads' : IDL.Func([], [IDL.Vec(Lead)], ['query']),
+    'getAvailableFoundObjects' : IDL.Func(
+        [],
+        [IDL.Vec(FoundObject)],
+        ['query'],
+      ),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getMyObjects' : IDL.Func([], [IDL.Vec(PersonalObject)], ['query']),
+    'getMySubscription' : IDL.Func([], [SubscriptionInfo], ['query']),
+    'getObjectById' : IDL.Func([IDL.Nat], [IDL.Opt(PersonalObject)], ['query']),
+    'getObjectsByStatus' : IDL.Func(
+        [ObjectStatus],
+        [IDL.Vec(PersonalObject)],
+        ['query'],
+      ),
+    'getObjectsByType' : IDL.Func(
+        [ObjectType],
+        [IDL.Vec(PersonalObject)],
+        ['query'],
+      ),
+    'getPublicStats' : IDL.Func([], [PublicStats], ['query']),
+    'getStats' : IDL.Func([], [LeadStats], ['query']),
+    'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+    'promoteToAdmin' : IDL.Func([IDL.Principal], [], []),
+    'publicObjectSearch' : IDL.Func([IDL.Text], [IDL.Text], ['query']),
+    'registerObject' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, ObjectType],
+        [IDL.Nat],
+        [],
+      ),
+    'reportTheft' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Text,
+          IDL.Int,
+          IDL.Int,
+          IDL.Int,
+          IDL.Text,
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Int),
+          IDL.Opt(IDL.Int),
+        ],
+        [],
+        [],
+      ),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
     'submitLead' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'transform' : IDL.Func(
+        [TransformationInput],
+        [TransformationOutput],
+        ['query'],
+      ),
+    'upgradeToPremium' : IDL.Func(
+        [SubscriptionPlan, IDL.Text, IDL.Int],
+        [],
+        [],
+      ),
   });
 };
 

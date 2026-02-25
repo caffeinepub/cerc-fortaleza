@@ -10,14 +10,178 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface FoundObject {
+  'id' : bigint,
+  'status' : { 'claimed' : null } |
+    { 'available' : null },
+  'createdAt' : bigint,
+  'description' : string,
+  'finder' : Principal,
+  'location' : string,
+}
 export interface Lead {
   'name' : string,
   'whatsapp' : string,
   'timestamp' : bigint,
 }
+export interface LeadStats {
+  'today' : bigint,
+  'total' : bigint,
+  'thisWeek' : bigint,
+}
+export type ObjectStatus = { 'stolen' : TheftInfo } |
+  { 'safe' : null };
+export type ObjectType = { 'other' : string } |
+  { 'bike' : null } |
+  { 'notebook' : null } |
+  { 'phone' : null };
+export interface PersonalObject {
+  'id' : bigint,
+  'status' : ObjectStatus,
+  'model' : string,
+  'owner' : Principal,
+  'createdAt' : bigint,
+  'objType' : ObjectType,
+  'brand' : string,
+  'identifier' : string,
+}
+export interface PublicStats {
+  'totalRecovered' : bigint,
+  'totalObjects' : bigint,
+  'totalStolen' : bigint,
+}
+export interface ShoppingItem {
+  'productName' : string,
+  'currency' : string,
+  'quantity' : bigint,
+  'priceInCents' : bigint,
+  'productDescription' : string,
+}
+export interface StripeConfiguration {
+  'allowedCountries' : Array<string>,
+  'secretKey' : string,
+}
+export type StripeSessionStatus = {
+    'completed' : { 'userPrincipal' : [] | [string], 'response' : string }
+  } |
+  { 'failed' : { 'error' : string } };
+export interface SubscriptionInfo {
+  'isExpired' : boolean,
+  'plan' : SubscriptionPlan,
+  'expirationDate' : [] | [bigint],
+  'objectCount' : bigint,
+  'objectLimit' : bigint,
+}
+export type SubscriptionPlan = { 'premiumMonthly' : null } |
+  { 'free' : null } |
+  { 'premiumAnnual' : null };
+export interface TheftInfo {
+  'latitude' : bigint,
+  'latitudeStart' : [] | [bigint],
+  'date' : bigint,
+  'stolenPlace' : [] | [string],
+  'reportDate' : bigint,
+  'longitude' : bigint,
+  'boNumber' : string,
+  'longitudeStart' : [] | [bigint],
+  'location' : string,
+}
+export interface TransformationInput {
+  'context' : Uint8Array,
+  'response' : http_request_result,
+}
+export interface TransformationOutput {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
+export interface UserProfile { 'name' : string }
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
+export interface http_header { 'value' : string, 'name' : string }
+export interface http_request_result {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addFoundObject' : ActorMethod<[string, string], bigint>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'canRegisterMoreObjects' : ActorMethod<[], boolean>,
+  'claimFoundObject' : ActorMethod<[bigint], undefined>,
+  'createCheckoutSession' : ActorMethod<
+    [Array<ShoppingItem>, string, string],
+    string
+  >,
+  'findMoreObjects' : ActorMethod<[string], Array<PersonalObject>>,
   'getAllLeads' : ActorMethod<[], Array<Lead>>,
+  'getAvailableFoundObjects' : ActorMethod<[], Array<FoundObject>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getMyObjects' : ActorMethod<[], Array<PersonalObject>>,
+  'getMySubscription' : ActorMethod<[], SubscriptionInfo>,
+  'getObjectById' : ActorMethod<[bigint], [] | [PersonalObject]>,
+  'getObjectsByStatus' : ActorMethod<[ObjectStatus], Array<PersonalObject>>,
+  'getObjectsByType' : ActorMethod<[ObjectType], Array<PersonalObject>>,
+  'getPublicStats' : ActorMethod<[], PublicStats>,
+  'getStats' : ActorMethod<[], LeadStats>,
+  'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'isStripeConfigured' : ActorMethod<[], boolean>,
+  'promoteToAdmin' : ActorMethod<[Principal], undefined>,
+  'publicObjectSearch' : ActorMethod<[string], string>,
+  'registerObject' : ActorMethod<[string, string, string, ObjectType], bigint>,
+  'reportTheft' : ActorMethod<
+    [
+      bigint,
+      string,
+      bigint,
+      bigint,
+      bigint,
+      string,
+      [] | [string],
+      [] | [bigint],
+      [] | [bigint],
+    ],
+    undefined
+  >,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'submitLead' : ActorMethod<[string, string], undefined>,
+  'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
+  'upgradeToPremium' : ActorMethod<
+    [SubscriptionPlan, string, bigint],
+    undefined
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
