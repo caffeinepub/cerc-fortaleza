@@ -12,9 +12,87 @@ import {
   Search,
   Users,
   Star,
+  Copy,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
+const PIX_KEY = "proj.defdriver+pagbank@gmail.com";
+
+function PixPaymentBlock({ price }: { price: string }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(PIX_KEY).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="mt-6">
+      {/* Divider */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex-1 h-px bg-white/20" />
+        <span className="text-white/60 text-xs font-semibold uppercase tracking-widest whitespace-nowrap">
+          ou pague via Pix
+        </span>
+        <div className="flex-1 h-px bg-white/20" />
+      </div>
+
+      {/* Pix Container */}
+      <div className="bg-white rounded-2xl p-5 flex flex-col items-center gap-3 shadow-inner">
+        {/* QR Code */}
+        <img
+          src="/assets/uploads/pix-QR-CODE-1.jpeg"
+          alt="QR Code Pix CERC Fortaleza"
+          width={160}
+          height={160}
+          className="rounded-xl object-contain"
+        />
+
+        {/* Price label */}
+        <p className="text-slate-700 font-bold text-base tracking-tight">
+          {price}
+        </p>
+
+        {/* Pix key copy */}
+        <div className="w-full">
+          <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1 text-center">
+            Chave Pix (e-mail)
+          </p>
+          <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2 border border-slate-200">
+            <span className="flex-1 font-mono text-xs text-slate-700 truncate select-all">
+              {PIX_KEY}
+            </span>
+            <button
+              type="button"
+              onClick={handleCopy}
+              aria-label="Copiar chave Pix"
+              className="shrink-0 p-1.5 rounded-lg transition-colors hover:bg-slate-200 active:scale-95"
+            >
+              {copied ? (
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              ) : (
+                <Copy className="w-4 h-4 text-slate-500" />
+              )}
+            </button>
+          </div>
+          {copied && (
+            <p className="text-center text-xs text-green-600 font-semibold mt-1.5 animate-fade-in">
+              ✓ Chave copiada!
+            </p>
+          )}
+        </div>
+
+        <p className="text-xs text-slate-400 text-center leading-relaxed">
+          Escaneie o QR code ou copie a chave Pix acima e envie o comprovante para ativação.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 type BillingPeriod = "monthly" | "annual";
 
@@ -40,7 +118,7 @@ export function PlanosPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground sticky top-0 z-50 shadow-lg">
+      <header className="bg-[#1a1a2e] text-white sticky top-0 z-50 shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Button
@@ -48,7 +126,7 @@ export function PlanosPage() {
               variant="ghost"
               size="sm"
               onClick={() => navigate({ to: "/" })}
-              className="text-primary-foreground hover:bg-primary-foreground/10 gap-2 shrink-0"
+              className="text-white hover:bg-white/10 gap-2 shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Voltar</span>
@@ -68,32 +146,32 @@ export function PlanosPage() {
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="bg-primary text-primary-foreground pb-12 md:pb-20 pt-8 md:pt-12">
+        <section className="bg-gradient-to-b from-blue-50 to-slate-100 text-slate-800 pb-12 md:pb-20 pt-8 md:pt-12 border-b border-slate-200">
           <div className="container mx-auto px-4 text-center space-y-4">
             <div className="flex justify-center">
               <Badge className="bg-accent text-accent-foreground text-sm px-4 py-1.5 font-bold gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" />
-                Escolha sua proteção
+                Escolha seu nível de proteção
               </Badge>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold leading-tight tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold leading-tight tracking-tight text-slate-900">
               Proteja seus bens com o plano ideal
             </h1>
-            <p className="text-primary-foreground/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
               Do essencial ao avançado — tenha controle total sobre o que é seu.
               Fortaleza mais segura começa com uma decisão.
             </p>
 
             {/* Billing Toggle */}
             <div className="flex items-center justify-center pt-4">
-              <div className="inline-flex bg-primary-foreground/10 rounded-full p-1 gap-1">
+              <div className="inline-flex bg-slate-200 rounded-full p-1 gap-1">
                 <button
                   type="button"
                   onClick={() => setBilling("monthly")}
                   className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 ${
                     billing === "monthly"
-                      ? "bg-primary-foreground text-primary shadow-md"
-                      : "text-primary-foreground/70 hover:text-primary-foreground"
+                      ? "bg-white text-slate-900 shadow-md"
+                      : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
                   Mensal
@@ -103,8 +181,8 @@ export function PlanosPage() {
                   onClick={() => setBilling("annual")}
                   className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 flex items-center gap-2 ${
                     billing === "annual"
-                      ? "bg-primary-foreground text-primary shadow-md"
-                      : "text-primary-foreground/70 hover:text-primary-foreground"
+                      ? "bg-white text-slate-900 shadow-md"
+                      : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
                   Anual
@@ -186,7 +264,7 @@ export function PlanosPage() {
             </div>
 
             {/* Premium Plan Card */}
-            <div className="relative bg-gradient-to-br from-primary via-primary/95 to-primary/90 border-4 border-accent rounded-2xl overflow-hidden flex flex-col shadow-2xl transition-all duration-300 hover:shadow-accent/20 hover:scale-[1.01]">
+            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-4 border-accent rounded-2xl overflow-hidden flex flex-col shadow-2xl transition-all duration-300 hover:shadow-accent/20 hover:scale-[1.01]">
               {/* Most Popular Badge */}
               <div className="absolute top-0 left-0 right-0 flex justify-center">
                 <div className="bg-accent text-accent-foreground text-xs font-bold px-6 py-1.5 rounded-b-xl shadow-lg flex items-center gap-1.5">
@@ -201,10 +279,10 @@ export function PlanosPage() {
                   <span className="inline-block text-xs font-bold uppercase tracking-widest text-accent/80 mb-2">
                     Plano
                   </span>
-                  <h2 className="text-2xl md:text-3xl font-display font-extrabold text-primary-foreground tracking-tight">
+                  <h2 className="text-2xl md:text-3xl font-display font-extrabold text-white tracking-tight">
                     Premium
                   </h2>
-                  <p className="text-primary-foreground/70 text-sm mt-1">
+                  <p className="text-white/75 text-sm mt-1">
                     Proteção Ativa — para quem leva segurança a sério
                   </p>
                 </div>
@@ -217,9 +295,9 @@ export function PlanosPage() {
                         <span className="text-5xl font-display font-extrabold text-accent tracking-tight">
                           R$ 9,90
                         </span>
-                        <span className="text-primary-foreground/70 mb-2 text-base">/mês</span>
+                        <span className="text-white/75 mb-2 text-base">/mês</span>
                       </div>
-                      <p className="text-xs text-primary-foreground/60 mt-1">
+                      <p className="text-xs text-white/65 mt-1">
                         ou R$ 89,00/ano economizando ~25%
                       </p>
                     </div>
@@ -229,12 +307,12 @@ export function PlanosPage() {
                         <span className="text-5xl font-display font-extrabold text-accent tracking-tight">
                           R$ 89,00
                         </span>
-                        <span className="text-primary-foreground/70 mb-2 text-base">/ano</span>
+                        <span className="text-white/75 mb-2 text-base">/ano</span>
                         <Badge className="bg-accent text-accent-foreground text-xs font-bold mb-2">
                           -25%
                         </Badge>
                       </div>
-                      <p className="text-xs text-primary-foreground/60 mt-1">
+                      <p className="text-xs text-white/65 mt-1">
                         Equivale a R$ 7,42/mês — Economia de R$ 29,80
                       </p>
                     </div>
@@ -249,9 +327,9 @@ export function PlanosPage() {
                         <Check className="w-3.5 h-3.5 text-accent" />
                       </div>
                       <div>
-                        <span className="text-primary-foreground font-semibold text-sm">{label}</span>
+                        <span className="text-white font-semibold text-sm">{label}</span>
                         {detail && (
-                          <span className="text-primary-foreground/60 text-sm"> — {detail}</span>
+                          <span className="text-white/65 text-sm"> — {detail}</span>
                         )}
                       </div>
                     </li>
@@ -291,10 +369,15 @@ export function PlanosPage() {
                       </Button>
                     </a>
                   )}
-                  <p className="text-xs text-center text-primary-foreground/50 mt-3">
+                  <p className="text-xs text-center text-white/50 mt-3">
                     Pagamento seguro via Stripe · Cancele a qualquer momento
                   </p>
                 </div>
+
+                {/* Pix Payment Block */}
+                <PixPaymentBlock
+                  price={billing === "monthly" ? "R$ 9,90 / mês" : "R$ 89,00 / ano"}
+                />
               </div>
             </div>
           </div>
