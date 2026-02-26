@@ -19,6 +19,11 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
+export const SubscriptionPlan = IDL.Variant({
+  'premiumMonthly' : IDL.Null,
+  'free' : IDL.Null,
+  'premiumAnnual' : IDL.Null,
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -76,11 +81,6 @@ export const FoundObject = IDL.Record({
   'location' : IDL.Text,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
-export const SubscriptionPlan = IDL.Variant({
-  'premiumMonthly' : IDL.Null,
-  'free' : IDL.Null,
-  'premiumAnnual' : IDL.Null,
-});
 export const SubscriptionInfo = IDL.Record({
   'isExpired' : IDL.Bool,
   'plan' : SubscriptionPlan,
@@ -156,6 +156,7 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'activateMyPremium' : IDL.Func([IDL.Text, SubscriptionPlan], [], []),
   'addFoundObject' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'canRegisterMoreObjects' : IDL.Func([], [IDL.Bool], ['query']),
@@ -244,6 +245,11 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
+  const SubscriptionPlan = IDL.Variant({
+    'premiumMonthly' : IDL.Null,
+    'free' : IDL.Null,
+    'premiumAnnual' : IDL.Null,
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -298,11 +304,6 @@ export const idlFactory = ({ IDL }) => {
     'location' : IDL.Text,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
-  const SubscriptionPlan = IDL.Variant({
-    'premiumMonthly' : IDL.Null,
-    'free' : IDL.Null,
-    'premiumAnnual' : IDL.Null,
-  });
   const SubscriptionInfo = IDL.Record({
     'isExpired' : IDL.Bool,
     'plan' : SubscriptionPlan,
@@ -375,6 +376,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'activateMyPremium' : IDL.Func([IDL.Text, SubscriptionPlan], [], []),
     'addFoundObject' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'canRegisterMoreObjects' : IDL.Func([], [IDL.Bool], ['query']),

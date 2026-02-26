@@ -137,6 +137,7 @@ export enum Variant_claimed_available {
     available = "available"
 }
 export interface backendInterface {
+    activateMyPremium(sessionId: string, plan: SubscriptionPlan): Promise<void>;
     addFoundObject(description: string, location: string): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     canRegisterMoreObjects(): Promise<boolean>;
@@ -151,7 +152,7 @@ export interface backendInterface {
     getMySubscription(): Promise<SubscriptionInfo>;
     getObjectById(objectId: bigint): Promise<PersonalObject | null>;
     getObjectsByStatus(status: ObjectStatus): Promise<Array<PersonalObject>>;
-    getObjectsByType(_objType: ObjectType): Promise<Array<PersonalObject>>;
+    getObjectsByType(objType: ObjectType): Promise<Array<PersonalObject>>;
     getPublicStats(): Promise<PublicStats>;
     getStats(): Promise<LeadStats>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;

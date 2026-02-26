@@ -14,6 +14,7 @@ import { VaultTab } from "@/pages/VaultTab";
 import { RecoveredTab } from "@/pages/RecoveredTab";
 import { SOSTab } from "@/pages/SOSTab";
 import { StripeConfigPage } from "@/pages/StripeConfigPage";
+import { PlanosPage } from "@/pages/PlanosPage";
 import { Toaster } from "@/components/ui/sonner";
 
 // Define root route with layout
@@ -63,6 +64,12 @@ const onboardingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/onboarding",
   component: OnboardingPage,
+});
+
+const planosRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/planos",
+  component: PlanosPage,
 });
 
 const checkoutRoute = createRoute({
@@ -127,6 +134,7 @@ const routeTree = rootRoute.addChildren([
   adminRoute,
   stripeConfigRoute,
   onboardingRoute,
+  planosRoute,
   checkoutRoute,
   checkoutSuccessRoute,
   appRoute.addChildren([

@@ -133,6 +133,7 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'activateMyPremium' : ActorMethod<[string, SubscriptionPlan], undefined>,
   'addFoundObject' : ActorMethod<[string, string], bigint>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'canRegisterMoreObjects' : ActorMethod<[], boolean>,

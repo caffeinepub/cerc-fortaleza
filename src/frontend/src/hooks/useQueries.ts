@@ -59,7 +59,7 @@ export function useIsAdmin() {
   });
 }
 
-// --- NEW QUERIES FOR CERC APP ---
+// --- CERC APP QUERIES ---
 
 export function useMyObjects() {
   const { actor, isFetching } = useActor();
@@ -96,17 +96,17 @@ export function useReportTheft() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      objectId, 
-      boNumber, 
-      latitude, 
-      longitude, 
-      date, 
+    mutationFn: async ({
+      objectId,
+      boNumber,
+      latitude,
+      longitude,
+      date,
       location,
       stolenPlace,
       latitudeStart,
-      longitudeStart
-    }: { 
+      longitudeStart,
+    }: {
       objectId: bigint;
       boNumber: string;
       latitude: bigint;
@@ -119,15 +119,15 @@ export function useReportTheft() {
     }) => {
       if (!actor) throw new Error("Actor not initialized");
       return actor.reportTheft(
-        objectId, 
-        boNumber, 
-        latitude, 
-        longitude, 
-        date, 
+        objectId,
+        boNumber,
+        latitude,
+        longitude,
+        date,
         location,
-        stolenPlace || null,
-        latitudeStart || null,
-        longitudeStart || null
+        stolenPlace ?? null,
+        latitudeStart ?? null,
+        longitudeStart ?? null
       );
     },
     onSuccess: () => {
@@ -208,7 +208,7 @@ export function usePublicStats() {
   });
 }
 
-// --- SUBSCRIPTION QUERIES ---
+// --- SUBSCRIPTION & STRIPE QUERIES ---
 
 import type { SubscriptionInfo, ShoppingItem, StripeSessionStatus, SubscriptionPlan } from "@/backend.d";
 
@@ -227,7 +227,7 @@ export function useIsStripeConfigured() {
       return actor.isStripeConfigured();
     },
     enabled: !!actor && !isFetching,
-    staleTime: 60000, // Cache por 1 minuto
+    staleTime: 60000,
   });
 }
 
@@ -263,21 +263,51 @@ export function useCreateCheckoutSession() {
   const { actor } = useActor();
 
   return useMutation({
-    mutationFn: async ({ items, successUrl, cancelUrl }: { 
-      items: ShoppingItem[]; 
-      successUrl: string; 
-      cancelUrl: string; 
+    mutationFn: async ({
+      items,
+      successUrl,
+      cancelUrl,
+    }: {
+      items: ShoppingItem[];
+      successUrl: string;
+      cancelUrl: string;
     }): Promise<CheckoutSession> => {
       if (!actor) throw new Error("Actor not available");
-      
+
       const result = await actor.createCheckoutSession(items, successUrl, cancelUrl);
-      
-      // JSON parsing is important!
-      const session = JSON.parse(result) as CheckoutSession;
-      if (!session?.url) {
-        throw new Error("Stripe session missing url");
+
+      console.log("[Stripe] Raw response:", result.substring(0, 300));
+
+      let url: string | undefined;
+      let id: string | undefined;
+
+      // Try JSON parse first
+      try {
+        const parsed = JSON.parse(result) as Record<string, unknown>;
+        url = typeof parsed?.url === "string" ? parsed.url : undefined;
+        id = typeof parsed?.id === "string" ? parsed.id : undefined;
+      } catch {
+        console.warn("[Stripe] JSON parse failed, falling back to regex");
       }
-      return session;
+
+      // Regex fallback: extract url and id from raw JSON string
+      if (!url) {
+        const urlMatch = result.match(/"url"\s*:\s*"(https?:[^"]+)"/);
+        if (urlMatch) url = urlMatch[1].replace(/\\/g, "");
+      }
+      if (!id) {
+        const idMatch = result.match(/"id"\s*:\s*"(cs_[^"]+)"/);
+        if (idMatch) id = idMatch[1];
+      }
+
+      if (!url) {
+        console.error("[Stripe] Could not extract url. Response:", result.substring(0, 500));
+        throw new Error(
+          "Não foi possível obter a URL de pagamento do Stripe. Verifique as configurações."
+        );
+      }
+
+      return { id: id ?? "", url };
     },
   });
 }
@@ -298,17 +328,33 @@ export function useUpgradeToPremium() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      plan, 
-      stripeCustomerId, 
-      expirationDate 
-    }: { 
-      plan: SubscriptionPlan; 
-      stripeCustomerId: string; 
-      expirationDate: bigint; 
+    mutationFn: async ({
+      plan,
+      stripeCustomerId,
+      expirationDate,
+    }: {
+      plan: SubscriptionPlan;
+      stripeCustomerId: string;
+      expirationDate: bigint;
     }) => {
       if (!actor) throw new Error("Actor not available");
       return actor.upgradeToPremium(plan, stripeCustomerId, expirationDate);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mySubscription"] });
+      queryClient.invalidateQueries({ queryKey: ["canRegisterMoreObjects"] });
+    },
+  });
+}
+
+export function useActivateMyPremium() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ sessionId, plan }: { sessionId: string; plan: SubscriptionPlan }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.activateMyPremium(sessionId, plan);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mySubscription"] });

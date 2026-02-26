@@ -401,14 +401,14 @@ export function LandingPage() {
                 <div className="space-y-3">
                   <Button 
                     className="w-full h-14 text-base md:text-lg font-bold bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
-                    onClick={() => navigate({ to: "/checkout", search: { plan: "monthly" } })}
+                    onClick={() => navigate({ to: "/planos" })}
                   >
                     Assinar Mensal - R$ 9,90/mês
                   </Button>
                   <Button 
                     variant="outline"
                     className="w-full h-12 text-base font-bold border-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-all duration-300"
-                    onClick={() => navigate({ to: "/checkout", search: { plan: "annual" } })}
+                    onClick={() => navigate({ to: "/planos" })}
                   >
                     Assinar Anual - R$ 89,00/ano
                   </Button>
