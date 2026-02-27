@@ -1,11 +1,24 @@
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { Crown, CheckCircle2, ArrowRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import { useActivateMyPremium } from "@/hooks/useQueries";
 import { SubscriptionPlan } from "@/backend.d";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useActivateMyPremium } from "@/hooks/useQueries";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  Crown,
+  Loader2,
+  RefreshCw,
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 type PlanKey = "monthly" | "annual";
 
@@ -42,16 +55,26 @@ export function CheckoutSuccessPage() {
 
     const { sessionId, planKey } = getSearchParams();
 
-    console.log("[CheckoutSuccess] Processing payment", { sessionId: sessionId.substring(0, 20), planKey });
+    console.log("[CheckoutSuccess] Processing payment", {
+      sessionId: sessionId.substring(0, 20),
+      planKey,
+    });
 
     // Store truncated session ID for display
     if (sessionId) {
-      setSessionIdDisplay(sessionId.length > 20 ? sessionId.substring(0, 20) + "..." : sessionId);
+      setSessionIdDisplay(
+        sessionId.length > 20 ? `${sessionId.substring(0, 20)}...` : sessionId,
+      );
     }
 
     // Validate session_id
-    if (!sessionId || sessionId.trim() === "" || sessionId === "{CHECKOUT_SESSION_ID}") {
-      const msg = "ID de sessão inválido ou não encontrado. Verifique o link de retorno do pagamento.";
+    if (
+      !sessionId ||
+      sessionId.trim() === "" ||
+      sessionId === "{CHECKOUT_SESSION_ID}"
+    ) {
+      const msg =
+        "ID de sessão inválido ou não encontrado. Verifique o link de retorno do pagamento.";
       console.error("[CheckoutSuccess] Invalid session_id:", sessionId);
       setErrorMessage(msg);
       setPageState("error");
@@ -60,7 +83,8 @@ export function CheckoutSuccessPage() {
 
     // Validate plan
     if (planKey !== "monthly" && planKey !== "annual") {
-      const msg = "Plano de assinatura não reconhecido. Entre em contato com o suporte.";
+      const msg =
+        "Plano de assinatura não reconhecido. Entre em contato com o suporte.";
       console.error("[CheckoutSuccess] Invalid plan:", planKey);
       setErrorMessage(msg);
       setPageState("error");
@@ -71,7 +95,9 @@ export function CheckoutSuccessPage() {
 
     // Timeout: 60 seconds
     const timeoutId = setTimeout(() => {
-      setErrorMessage("O processamento excedeu o tempo limite (60 segundos). Entre em contato com o suporte.");
+      setErrorMessage(
+        "O processamento excedeu o tempo limite (60 segundos). Entre em contato com o suporte.",
+      );
       setPageState("error");
     }, 60000);
 
@@ -80,10 +106,15 @@ export function CheckoutSuccessPage() {
       clearTimeout(timeoutId);
       console.log("[CheckoutSuccess] Premium activated successfully");
       setPageState("success");
-      toast.success("Assinatura Premium ativada com sucesso!", { duration: 5000 });
+      toast.success("Assinatura Premium ativada com sucesso!", {
+        duration: 5000,
+      });
     } catch (error) {
       clearTimeout(timeoutId);
-      const msg = error instanceof Error ? error.message : "Erro desconhecido ao ativar assinatura";
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Erro desconhecido ao ativar assinatura";
       console.error("[CheckoutSuccess] Activation error:", msg);
 
       // Auto-retry once after 5 seconds before showing error UI
@@ -99,7 +130,7 @@ export function CheckoutSuccessPage() {
 
       setErrorMessage(msg);
       setPageState("error");
-      toast.error("Erro ao ativar assinatura: " + msg, { duration: 6000 });
+      toast.error(`Erro ao ativar assinatura: ${msg}`, { duration: 6000 });
     }
   }, [activateMyPremium]);
 
@@ -132,7 +163,9 @@ export function CheckoutSuccessPage() {
               </div>
               <div className="space-y-3">
                 <h2 className="text-2xl md:text-3xl font-display font-bold text-primary">
-                  {isRetrying ? "Tentando Novamente..." : "Ativando sua Assinatura..."}
+                  {isRetrying
+                    ? "Tentando Novamente..."
+                    : "Ativando sua Assinatura..."}
                 </h2>
                 <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
                   {isRetrying
@@ -141,9 +174,18 @@ export function CheckoutSuccessPage() {
                 </p>
               </div>
               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div
+                  className="w-2 h-2 bg-accent rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                />
+                <div
+                  className="w-2 h-2 bg-accent rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                />
+                <div
+                  className="w-2 h-2 bg-accent rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                />
               </div>
             </div>
           </CardContent>
@@ -155,7 +197,10 @@ export function CheckoutSuccessPage() {
   // Error state
   if (pageState === "error") {
     const { sessionId } = getSearchParams();
-    const displayId = sessionId.length > 20 ? sessionId.substring(0, 20) + "..." : (sessionIdDisplay || "N/A");
+    const displayId =
+      sessionId.length > 20
+        ? `${sessionId.substring(0, 20)}...`
+        : sessionIdDisplay || "N/A";
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4">
@@ -172,16 +217,19 @@ export function CheckoutSuccessPage() {
                   Erro ao Ativar Assinatura
                 </h2>
                 <p className="text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                  Seu pagamento foi processado pelo Stripe, mas houve um erro ao ativar sua
-                  assinatura. Clique em &quot;Tentar Ativar Novamente&quot; ou entre em contato
-                  com o suporte informando o ID da sessão.
+                  Seu pagamento foi processado pelo Stripe, mas houve um erro ao
+                  ativar sua assinatura. Clique em &quot;Tentar Ativar
+                  Novamente&quot; ou entre em contato com o suporte informando o
+                  ID da sessão.
                 </p>
               </div>
 
               {/* Session ID reference */}
               <div className="bg-muted/50 border border-border rounded-lg p-3 text-sm text-foreground/70">
                 <p className="font-semibold mb-1">ID da Sessão:</p>
-                <code className="font-mono text-xs break-all text-foreground/90">{displayId}</code>
+                <code className="font-mono text-xs break-all text-foreground/90">
+                  {displayId}
+                </code>
               </div>
 
               {/* Error detail */}
@@ -193,8 +241,9 @@ export function CheckoutSuccessPage() {
               <div className="bg-muted/50 border border-border rounded-lg p-4 text-sm text-foreground/70 text-left">
                 <p className="font-semibold mb-1">Não se preocupe:</p>
                 <p>
-                  Se o pagamento foi confirmado pelo Stripe, entre em contato com o suporte
-                  informando o ID da sessão acima. Você não será cobrado novamente.
+                  Se o pagamento foi confirmado pelo Stripe, entre em contato
+                  com o suporte informando o ID da sessão acima. Você não será
+                  cobrado novamente.
                 </p>
               </div>
 
@@ -243,7 +292,8 @@ export function CheckoutSuccessPage() {
               Pagamento Confirmado!
             </CardTitle>
             <CardDescription className="text-lg md:text-xl leading-relaxed">
-              Sua assinatura <strong className="text-accent">Premium</strong> está ativa agora
+              Sua assinatura <strong className="text-accent">Premium</strong>{" "}
+              está ativa agora
             </CardDescription>
           </div>
         </CardHeader>
@@ -278,15 +328,22 @@ export function CheckoutSuccessPage() {
             <div className="space-y-3 text-sm text-foreground/80">
               <div className="flex gap-3">
                 <span className="font-bold text-accent w-5 shrink-0">1.</span>
-                <p>Acesse seu <strong>Meu Baú</strong> e cadastre até 10 objetos</p>
+                <p>
+                  Acesse seu <strong>Meu Baú</strong> e cadastre até 10 objetos
+                </p>
               </div>
               <div className="flex gap-3">
                 <span className="font-bold text-accent w-5 shrink-0">2.</span>
-                <p>Configure alertas para receber notificações de segurança em tempo real</p>
+                <p>
+                  Configure alertas para receber notificações de segurança em
+                  tempo real
+                </p>
               </div>
               <div className="flex gap-3">
                 <span className="font-bold text-accent w-5 shrink-0">3.</span>
-                <p>Aproveite todos os recursos Premium disponíveis no seu painel</p>
+                <p>
+                  Aproveite todos os recursos Premium disponíveis no seu painel
+                </p>
               </div>
             </div>
           </div>

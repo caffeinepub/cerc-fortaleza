@@ -1,18 +1,60 @@
-import { useState } from "react";
-import { Plus, Smartphone, Bike, Laptop, Package, AlertTriangle, Loader2, Crown, Lock, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ObjectType, PersonalObject } from "@/backend.d";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { useMyObjects, useRegisterObject, useReportTheft, useMySubscription } from "@/hooks/useQueries";
-import type { PersonalObject, ObjectType } from "@/backend.d";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  useMyObjects,
+  useMySubscription,
+  useRegisterObject,
+  useReportTheft,
+} from "@/hooks/useQueries";
 import { useNavigate } from "@tanstack/react-router";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Bike,
+  Crown,
+  Laptop,
+  Loader2,
+  Lock,
+  Package,
+  Plus,
+  ShieldCheck,
+  Smartphone,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const objectTypeIcons = {
   phone: Smartphone,
@@ -28,67 +70,83 @@ const objectTypeLabels = {
   other: "Outro",
 };
 
+function getObjectTypeKey(
+  objType: ObjectType,
+): "phone" | "bike" | "notebook" | "other" {
+  if (objType.__kind__ === "phone") return "phone";
+  if (objType.__kind__ === "bike") return "bike";
+  if (objType.__kind__ === "notebook") return "notebook";
+  return "other";
+}
+
+function maskIdentifier(id: string) {
+  if (id.length <= 4) return id;
+  return `*****${id.slice(-4)}`;
+}
+
+function formatExpirationDate(expirationNs?: bigint): string {
+  if (!expirationNs) return "N/A";
+  const ms = Number(expirationNs) / 1_000_000;
+  const date = new Date(ms);
+  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const y = date.getFullYear();
+  return `${d}/${m}/${y}`;
+}
+
 export function VaultTab() {
   const navigate = useNavigate();
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
-  const [selectedObject, setSelectedObject] = useState<PersonalObject | null>(null);
+  const [selectedObject, setSelectedObject] = useState<PersonalObject | null>(
+    null,
+  );
 
-  // Form states
   const [brand, setBrand] = useState("");
   const [model, setModel] = useState("");
   const [identifier, setIdentifier] = useState("");
-  const [objType, setObjType] = useState<"phone" | "bike" | "notebook" | "other">("phone");
+  const [objType, setObjType] = useState<
+    "phone" | "bike" | "notebook" | "other"
+  >("phone");
 
-  // Report theft form states
   const [boNumber, setBoNumber] = useState("");
   const [location, setLocation] = useState("");
 
   const { data: objects = [], isLoading } = useMyObjects();
-  const { data: subscription, isLoading: isLoadingSubscription } = useMySubscription();
-  const { mutate: registerObject, isPending: isRegistering } = useRegisterObject();
+  const { data: subscription, isLoading: isLoadingSubscription } =
+    useMySubscription();
+  const { mutate: registerObject, isPending: isRegistering } =
+    useRegisterObject();
   const { mutate: reportTheft, isPending: isReporting } = useReportTheft();
 
   const isPremium = subscription?.plan !== "free";
-  const canAddMore = subscription ? Number(subscription.objectCount) < Number(subscription.objectLimit) : false;
-  const isExpired = subscription?.isExpired || false;
-
-  const formatExpirationDate = (expirationNs?: bigint): string => {
-    if (!expirationNs) return "N/A";
-    const expirationMs = Number(expirationNs) / 1_000_000;
-    const date = new Date(expirationMs);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+  const canAddMore = subscription
+    ? Number(subscription.objectCount) < Number(subscription.objectLimit)
+    : false;
+  const isExpired = subscription?.isExpired ?? false;
 
   const handleRegisterObject = () => {
     if (!brand.trim() || !model.trim() || !identifier.trim()) {
       toast.error("Por favor, preencha todos os campos");
       return;
     }
-
     if (identifier.length < 6) {
       toast.error("O identificador deve ter no mínimo 6 caracteres");
       return;
     }
 
-    let objectTypeVariant: ObjectType;
-    switch (objType) {
-      case "phone":
-        objectTypeVariant = { __kind__: "phone", phone: null };
-        break;
-      case "bike":
-        objectTypeVariant = { __kind__: "bike", bike: null };
-        break;
-      case "notebook":
-        objectTypeVariant = { __kind__: "notebook", notebook: null };
-        break;
-      case "other":
-        objectTypeVariant = { __kind__: "other", other: "" };
-        break;
-    }
+    const objectTypeVariant: ObjectType = (() => {
+      switch (objType) {
+        case "phone":
+          return { __kind__: "phone", phone: null };
+        case "bike":
+          return { __kind__: "bike", bike: null };
+        case "notebook":
+          return { __kind__: "notebook", notebook: null };
+        default:
+          return { __kind__: "other", other: "" };
+      }
+    })();
 
     registerObject(
       { brand, model, identifier, objType: objectTypeVariant },
@@ -105,34 +163,32 @@ export function VaultTab() {
           console.error("Register error:", error);
           toast.error("Erro ao cadastrar objeto. Tente novamente.");
         },
-      }
+      },
     );
   };
 
   const handleReportTheft = () => {
     if (!selectedObject) return;
-
     if (!boNumber.trim() || !location.trim()) {
-      toast.error("Por favor, preencha o número do B.O. e o local");
+      toast.error("Preencha o número do B.O. e o local do ocorrido");
       return;
     }
 
     const now = Date.now();
-    const latitudeValue = BigInt(-3850000); // Fortaleza latitude * 1000000
-    const longitudeValue = BigInt(-38500000); // Fortaleza longitude * 1000000
-
     reportTheft(
       {
         objectId: selectedObject.id,
         boNumber: boNumber.trim(),
-        latitude: latitudeValue,
-        longitude: longitudeValue,
+        latitude: BigInt(-3850000),
+        longitude: BigInt(-38500000),
         date: BigInt(now * 1000000),
         location: location.trim(),
       },
       {
         onSuccess: () => {
-          toast.success("Roubo reportado com sucesso!");
+          toast.success(
+            "Roubo reportado! Objeto marcado como roubado na rede.",
+          );
           setIsReportDialogOpen(false);
           setSelectedObject(null);
           setBoNumber("");
@@ -142,124 +198,109 @@ export function VaultTab() {
           console.error("Report theft error:", error);
           toast.error("Erro ao reportar roubo. Tente novamente.");
         },
-      }
+      },
     );
   };
 
-  const openReportDialog = (obj: PersonalObject) => {
-    setSelectedObject(obj);
-    setIsReportDialogOpen(true);
-  };
-
-  const getObjectTypeKey = (objType: ObjectType): "phone" | "bike" | "notebook" | "other" => {
-    if ("phone" in objType) return "phone";
-    if ("bike" in objType) return "bike";
-    if ("notebook" in objType) return "notebook";
-    return "other";
-  };
-
-  const maskIdentifier = (id: string) => {
-    if (id.length <= 4) return id;
-    return "*****" + id.slice(-4);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+    <div className="min-h-full bg-gradient-to-br from-primary/5 via-background to-accent/5">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-center tracking-tight">
+      <header className="bg-secondary text-white shadow-navy">
+        <div className="container mx-auto px-4 py-5">
+          <h1 className="text-2xl font-display font-bold text-center tracking-tight">
             Meu Baú
           </h1>
-          <p className="text-center text-primary-foreground/90 text-sm md:text-base mt-2">
+          <p className="text-center text-white/70 text-sm mt-1">
             Seus objetos protegidos
           </p>
         </div>
       </header>
 
-      {/* Content */}
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Subscription Badge & Counter */}
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {/* Subscription status */}
         {isLoadingSubscription ? (
-          <div className="mb-6 space-y-2">
-            <Skeleton className="h-8 w-48 mx-auto" />
-            <Skeleton className="h-6 w-32 mx-auto" />
+          <div className="mb-5 space-y-2">
+            <Skeleton className="h-8 w-40 mx-auto rounded-full" />
+            <Skeleton className="h-5 w-28 mx-auto" />
           </div>
-        ) : subscription && (
-          <div className="mb-6 text-center space-y-2">
-            <Badge
-              variant={isPremium && !isExpired ? "default" : "secondary"}
-              className={`text-base px-4 py-1.5 ${
-                isPremium && !isExpired
-                  ? "bg-accent text-accent-foreground"
-                  : isExpired
-                  ? "bg-red-600 text-white"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {isPremium && !isExpired ? (
-                <>
-                  <Crown className="w-4 h-4 mr-2 inline" />
-                  Plano Premium
-                </>
-              ) : isExpired ? (
-                <>
-                  <AlertTriangle className="w-4 h-4 mr-2 inline" />
-                  Premium Expirado
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4 mr-2 inline" />
-                  Plano Gratuito
-                </>
-              )}
-            </Badge>
-            <p className="text-sm text-muted-foreground font-semibold">
-              {Number(subscription.objectCount)}/{Number(subscription.objectLimit)} objetos cadastrados
-            </p>
-            {isPremium && subscription.expirationDate && (
-              <p className="text-xs text-muted-foreground">
-                {isExpired ? (
-                  <span className="text-red-600 font-bold">Expirou em: {formatExpirationDate(subscription.expirationDate)}</span>
+        ) : (
+          subscription && (
+            <div className="mb-5 text-center space-y-1.5">
+              <Badge
+                className={`text-sm px-4 py-1.5 ${
+                  isPremium && !isExpired
+                    ? "bg-accent text-white"
+                    : isExpired
+                      ? "bg-red-600 text-white"
+                      : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {isPremium && !isExpired ? (
+                  <>
+                    <Crown className="w-3.5 h-3.5 mr-1.5 inline" />
+                    Plano Premium
+                  </>
+                ) : isExpired ? (
+                  <>
+                    <AlertTriangle className="w-3.5 h-3.5 mr-1.5 inline" />
+                    Premium Expirado
+                  </>
                 ) : (
-                  <span>Expira em: {formatExpirationDate(subscription.expirationDate)}</span>
+                  <>
+                    <Lock className="w-3.5 h-3.5 mr-1.5 inline" />
+                    Plano Gratuito
+                  </>
                 )}
+              </Badge>
+              <p className="text-sm text-muted-foreground font-medium">
+                {Number(subscription.objectCount)}/
+                {Number(subscription.objectLimit)} objetos cadastrados
               </p>
-            )}
-          </div>
+              {isPremium && subscription.expirationDate && (
+                <p className="text-xs text-muted-foreground">
+                  {isExpired ? (
+                    <span className="text-red-600 font-bold">
+                      Expirou em:{" "}
+                      {formatExpirationDate(subscription.expirationDate)}
+                    </span>
+                  ) : (
+                    <span>
+                      Expira em:{" "}
+                      {formatExpirationDate(subscription.expirationDate)}
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
+          )
         )}
 
-        {/* Upgrade CTA (if limit reached or expired) */}
+        {/* Upgrade CTA */}
         {subscription && (!canAddMore || isExpired) && (
-          <Card className="border-2 border-accent/30 bg-gradient-to-br from-accent/5 to-accent/10 mb-6">
+          <Card className="border-2 border-accent/30 bg-gradient-to-br from-accent/5 to-accent/10 mb-6 rounded-2xl">
             <CardContent className="pt-6 pb-6 text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-accent rounded-full flex items-center justify-center">
+              <div className="w-14 h-14 mx-auto bg-accent rounded-2xl flex items-center justify-center">
                 {isExpired ? (
-                  <AlertTriangle className="w-8 h-8 text-accent-foreground" />
+                  <AlertTriangle className="w-7 h-7 text-white" />
                 ) : (
-                  <Crown className="w-8 h-8 text-accent-foreground" />
+                  <Crown className="w-7 h-7 text-white" />
                 )}
               </div>
               <div>
-                <h3 className="text-xl font-display font-bold text-primary mb-2">
+                <h3 className="text-lg font-display font-bold text-primary mb-1.5">
                   {isExpired ? "Assinatura Expirada" : "Limite Atingido"}
                 </h3>
-                <p className="text-foreground/80 leading-relaxed">
-                  {isExpired ? (
-                    <>Sua assinatura Premium expirou. Renove agora para continuar aproveitando todos os benefícios!</>
-                  ) : (
-                    <>
-                      Você atingiu o limite do plano {isPremium ? "Premium" : "gratuito"} (
-                      {Number(subscription.objectCount)}/{Number(subscription.objectLimit)})
-                      {!isPremium && ". Faça upgrade para Premium e cadastre até 10 objetos!"}
-                    </>
-                  )}
+                <p className="text-foreground/70 text-sm leading-relaxed">
+                  {isExpired
+                    ? "Sua assinatura Premium expirou. Renove agora!"
+                    : `Limite de ${Number(subscription.objectCount)}/${Number(subscription.objectLimit)} objetos atingido.${!isPremium ? " Faça upgrade para Premium!" : ""}`}
                 </p>
               </div>
               {(!isPremium || isExpired) && (
                 <Button
-                  onClick={() => navigate({ to: "/checkout", search: { plan: "monthly" } })}
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-bold"
+                  type="button"
+                  onClick={() => navigate({ to: "/planos" })}
+                  className="bg-accent hover:bg-accent/90 text-white font-bold"
                 >
                   <Crown className="w-4 h-4 mr-2" />
                   {isExpired ? "Renovar Agora" : "Fazer Upgrade"}
@@ -270,31 +311,32 @@ export function VaultTab() {
           </Card>
         )}
 
+        {/* Objects list */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <Card key={i} className="border-2">
+              <Card key={i} className="border-2 rounded-2xl">
                 <CardContent className="pt-6">
-                  <Skeleton className="h-12 w-12 mb-4" />
-                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-12 w-12 mb-4 rounded-xl" />
+                  <Skeleton className="h-5 w-3/4 mb-2" />
                   <Skeleton className="h-4 w-1/2" />
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : objects.length === 0 ? (
-          <Card className="border-2 border-dashed border-primary/30">
+          <Card className="border-2 border-dashed border-primary/20 rounded-2xl">
             <CardContent className="pt-12 pb-12">
               <div className="text-center space-y-4">
-                <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                  <Package className="w-10 h-10 text-primary" />
+                <div className="w-20 h-20 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center">
+                  <ShieldCheck className="w-10 h-10 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-display font-bold text-primary mb-2">
+                  <h3 className="text-xl font-display font-bold text-primary mb-1.5">
                     Nenhum objeto cadastrado
                   </h3>
-                  <p className="text-muted-foreground">
-                    Cadastre seu primeiro bem para protegê-lo
+                  <p className="text-muted-foreground text-sm">
+                    Cadastre seu primeiro bem para protegê-lo na rede CERC
                   </p>
                 </div>
               </div>
@@ -308,18 +350,20 @@ export function VaultTab() {
               const isSafe = obj.status.__kind__ === "safe";
 
               return (
-                <Card 
-                  key={obj.id.toString()} 
-                  className={`border-2 hover:shadow-lg transition-shadow ${
-                    isSafe ? "border-primary/20" : "border-red-500"
+                <Card
+                  key={obj.id.toString()}
+                  className={`border-2 hover:shadow-navy transition-all rounded-2xl ${
+                    isSafe ? "border-primary/15" : "border-accent"
                   }`}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                          isSafe ? "bg-primary" : "bg-red-500"
-                        }`}>
+                        <div
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            isSafe ? "bg-primary" : "bg-accent"
+                          }`}
+                        >
                           <Icon className="w-6 h-6 text-white" />
                         </div>
                         <div>
@@ -331,21 +375,34 @@ export function VaultTab() {
                           </CardDescription>
                         </div>
                       </div>
-                      <Badge variant={isSafe ? "default" : "destructive"}>
+                      <Badge
+                        className={
+                          isSafe
+                            ? "bg-primary/10 text-primary border-0"
+                            : "bg-accent text-white border-0"
+                        }
+                      >
                         {isSafe ? "Seguro" : "Roubado"}
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <p className="text-sm text-muted-foreground">
-                      <strong className="text-foreground">ID:</strong> {maskIdentifier(obj.identifier)}
+                      <strong className="text-foreground">ID:</strong>{" "}
+                      <span className="font-mono">
+                        {maskIdentifier(obj.identifier)}
+                      </span>
                     </p>
                     {isSafe && (
                       <Button
-                        variant="destructive"
+                        type="button"
+                        variant="outline"
                         size="sm"
-                        className="w-full"
-                        onClick={() => openReportDialog(obj)}
+                        className="w-full border-2 border-accent text-accent hover:bg-accent hover:text-white transition-all"
+                        onClick={() => {
+                          setSelectedObject(obj);
+                          setIsReportDialogOpen(true);
+                        }}
                       >
                         <AlertTriangle className="w-4 h-4 mr-2" />
                         Reportar Roubo
@@ -359,33 +416,43 @@ export function VaultTab() {
         )}
       </div>
 
-      {/* Floating Add Button */}
+      {/* Floating add button */}
       <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
         <SheetTrigger asChild>
           <Button
+            type="button"
             size="lg"
-            className="fixed bottom-20 right-6 w-14 h-14 rounded-full shadow-2xl hover:scale-110 transition-transform z-40"
+            className="fixed bottom-20 right-5 w-14 h-14 rounded-full shadow-navy-lg hover:scale-110 transition-transform z-40 bg-accent hover:bg-accent/90"
             disabled={!canAddMore}
+            title={
+              canAddMore ? "Adicionar objeto" : "Limite de objetos atingido"
+            }
           >
             <Plus className="w-6 h-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="h-[90vh] overflow-auto">
+        <SheetContent
+          side="bottom"
+          className="h-[90vh] overflow-auto rounded-t-2xl"
+        >
           <SheetHeader className="mb-6">
             <SheetTitle className="text-2xl font-display text-primary">
               Cadastrar Novo Objeto
             </SheetTitle>
             <SheetDescription>
-              Proteja seu bem cadastrando-o em nosso sistema
+              Proteja seu bem registrando-o na rede CERC FORTALEZA
             </SheetDescription>
           </SheetHeader>
 
-          <div className="space-y-5">
+          <div className="space-y-5 pb-8">
             <div className="space-y-2">
-              <Label htmlFor="type" className="text-base font-semibold">
+              <Label className="text-sm font-semibold uppercase tracking-wide text-foreground/60">
                 Tipo de Objeto
               </Label>
-              <Select value={objType} onValueChange={(value) => setObjType(value as typeof objType)}>
+              <Select
+                value={objType}
+                onValueChange={(v) => setObjType(v as typeof objType)}
+              >
                 <SelectTrigger className="h-12 border-2">
                   <SelectValue />
                 </SelectTrigger>
@@ -399,7 +466,10 @@ export function VaultTab() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="brand" className="text-base font-semibold">
+              <Label
+                htmlFor="brand"
+                className="text-sm font-semibold uppercase tracking-wide text-foreground/60"
+              >
                 Marca
               </Label>
               <Input
@@ -412,7 +482,10 @@ export function VaultTab() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="model" className="text-base font-semibold">
+              <Label
+                htmlFor="model"
+                className="text-sm font-semibold uppercase tracking-wide text-foreground/60"
+              >
                 Modelo
               </Label>
               <Input
@@ -425,54 +498,62 @@ export function VaultTab() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="identifier" className="text-base font-semibold">
-                Identificador Único
+              <Label
+                htmlFor="identifier"
+                className="text-sm font-semibold uppercase tracking-wide text-foreground/60"
+              >
+                Identificador Único (IMEI/Chassi/Serial)
               </Label>
               <Input
                 id="identifier"
-                placeholder="IMEI, Chassi ou Número de Série"
+                placeholder="Mínimo de 6 caracteres"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 className="h-12 border-2"
               />
               <p className="text-xs text-muted-foreground">
-                Mínimo de 6 caracteres. Este número identifica seu objeto de forma única.
+                Este número identifica seu objeto de forma única na rede.
               </p>
             </div>
 
             <Button
+              type="button"
               onClick={handleRegisterObject}
               disabled={isRegistering}
-              className="w-full h-12 text-base font-bold mt-6"
+              className="w-full h-12 font-bold bg-primary hover:bg-primary/90 mt-4"
             >
               {isRegistering ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Cadastrando...
                 </>
               ) : (
-                "Cadastrar"
+                "Cadastrar Objeto"
               )}
             </Button>
           </div>
         </SheetContent>
       </Sheet>
 
-      {/* Report Theft Dialog */}
+      {/* Report theft dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-display text-red-600">
+            <DialogTitle className="text-2xl font-display text-accent">
               Reportar Roubo
             </DialogTitle>
             <DialogDescription>
-              {selectedObject && `${selectedObject.brand} ${selectedObject.model}`}
+              {selectedObject &&
+                `${selectedObject.brand} ${selectedObject.model}`}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="boNumber" className="text-base font-semibold">
+              <Label
+                htmlFor="boNumber"
+                className="text-sm font-semibold uppercase tracking-wide text-foreground/60"
+              >
                 Número do Boletim de Ocorrência *
               </Label>
               <Input
@@ -483,12 +564,15 @@ export function VaultTab() {
                 className="h-12 border-2"
               />
               <p className="text-xs text-muted-foreground">
-                Obrigatório para validar o reporte
+                Obrigatório para validar o reporte e evitar trotes
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location" className="text-base font-semibold">
+              <Label
+                htmlFor="location"
+                className="text-sm font-semibold uppercase tracking-wide text-foreground/60"
+              >
                 Local do Ocorrido *
               </Label>
               <Input
@@ -500,21 +584,22 @@ export function VaultTab() {
               />
             </div>
 
-            <div className="bg-red-50 dark:bg-red-950/20 border-2 border-red-200 dark:border-red-800 rounded-lg p-4">
-              <p className="text-sm text-red-600 dark:text-red-400">
-                ⚠️ Após confirmar, este objeto será marcado como <strong>ROUBADO</strong> em toda a rede instantaneamente.
+            <div className="bg-accent/10 border-2 border-accent/20 rounded-xl p-4">
+              <p className="text-sm text-accent font-medium">
+                ⚠️ Após confirmar, este objeto será marcado como{" "}
+                <strong>ROUBADO</strong> em toda a rede instantaneamente.
               </p>
             </div>
 
             <Button
+              type="button"
               onClick={handleReportTheft}
               disabled={isReporting}
-              variant="destructive"
-              className="w-full h-12 text-base font-bold"
+              className="w-full h-12 font-bold bg-accent hover:bg-accent/90 text-white"
             >
               {isReporting ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Reportando...
                 </>
               ) : (

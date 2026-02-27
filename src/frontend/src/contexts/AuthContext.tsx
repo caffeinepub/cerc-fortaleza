@@ -1,7 +1,14 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
-import { useInternetIdentity } from "@/hooks/useInternetIdentity";
-import { useActor } from "@/hooks/useActor";
 import { UserRole } from "@/backend.d";
+import { useActor } from "@/hooks/useActor";
+import { useInternetIdentity } from "@/hooks/useInternetIdentity";
+import {
+  type ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -15,9 +22,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { identity, login: iiLogin, clear: iiClear, loginStatus, isInitializing } = useInternetIdentity();
+  const {
+    identity,
+    login: iiLogin,
+    clear: iiClear,
+    loginStatus,
+    isInitializing,
+  } = useInternetIdentity();
   const { actor, isFetching } = useActor();
-  
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [userRole, setUserRole] = useState<UserRole>(UserRole.guest);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
@@ -77,7 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.clear();
   }, [iiClear]);
 
-  const isLoading = isInitializing || isCheckingAuth || loginStatus === "logging-in";
+  const isLoading =
+    isInitializing || isCheckingAuth || loginStatus === "logging-in";
 
   return (
     <AuthContext.Provider

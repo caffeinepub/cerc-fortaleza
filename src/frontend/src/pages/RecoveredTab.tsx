@@ -1,16 +1,32 @@
-import { useState } from "react";
-import { Plus, Package, MapPin, Loader2, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Variant_claimed_available } from "@/backend.d";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  useAddFoundObject,
+  useClaimFoundObject,
+  useFoundObjects,
+} from "@/hooks/useQueries";
+import { CheckCircle2, Loader2, MapPin, Package, Plus } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { useFoundObjects, useAddFoundObject, useClaimFoundObject } from "@/hooks/useQueries";
-import { Variant_claimed_available, type FoundObject } from "@/backend.d";
 
 export function RecoveredTab() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -19,7 +35,8 @@ export function RecoveredTab() {
 
   const { data: foundObjects = [], isLoading } = useFoundObjects();
   const { mutate: addFoundObject, isPending: isAdding } = useAddFoundObject();
-  const { mutate: claimFoundObject, isPending: isClaiming } = useClaimFoundObject();
+  const { mutate: claimFoundObject, isPending: isClaiming } =
+    useClaimFoundObject();
 
   const handleAddFoundObject = () => {
     if (!description.trim() || !location.trim()) {
@@ -31,7 +48,7 @@ export function RecoveredTab() {
       { description: description.trim(), location: location.trim() },
       {
         onSuccess: () => {
-          toast.success("Objeto adicionado ao mural com sucesso!");
+          toast.success("Objeto adicionado ao mural!");
           setIsAddDialogOpen(false);
           setDescription("");
           setLocation("");
@@ -40,56 +57,65 @@ export function RecoveredTab() {
           console.error("Add found object error:", error);
           toast.error("Erro ao adicionar objeto. Tente novamente.");
         },
-      }
+      },
     );
   };
 
   const handleClaimObject = (objectId: bigint) => {
     claimFoundObject(objectId, {
       onSuccess: () => {
-        toast.success("Objeto reivindicado com sucesso! Dirija-se ao local indicado.");
+        toast.success("Objeto reivindicado! Dirija-se ao local para retirada.");
       },
       onError: (error) => {
         console.error("Claim object error:", error);
-        toast.error("Erro ao reivindicar objeto. Tente novamente.");
+        toast.error("Erro ao reivindicar objeto.");
       },
     });
   };
 
+  const formatDate = (createdAt: bigint) => {
+    const date = new Date(Number(createdAt) / 1_000_000);
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5">
+    <div className="min-h-full bg-gradient-to-br from-primary/5 via-background to-accent/5">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-center tracking-tight">
+      <header className="bg-secondary text-white shadow-navy">
+        <div className="container mx-auto px-4 py-5">
+          <h1 className="text-2xl font-display font-bold text-center tracking-tight">
             Objetos Recuperados
           </h1>
-          <p className="text-center text-primary-foreground/90 text-sm md:text-base mt-2">
-            Mural de objetos encontrados pela comunidade
+          <p className="text-center text-white/70 text-sm mt-1">
+            Mural da comunidade CERC Fortaleza
           </p>
         </div>
       </header>
 
-      {/* Content */}
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Add Button */}
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {/* Add button */}
         <div className="mb-6">
           <Button
+            type="button"
             onClick={() => setIsAddDialogOpen(true)}
-            className="w-full md:w-auto h-12 text-base font-bold"
+            className="w-full md:w-auto h-12 font-bold bg-primary hover:bg-primary/90 rounded-xl"
           >
             <Plus className="w-5 h-5 mr-2" />
             Adicionar Objeto Encontrado
           </Button>
         </div>
 
-        {/* Objects Grid */}
+        {/* Objects grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <Card key={i} className="border-2">
+              <Card key={i} className="border-2 rounded-2xl">
                 <CardContent className="pt-6">
-                  <Skeleton className="h-6 w-3/4 mb-3" />
+                  <Skeleton className="h-5 w-3/4 mb-3" />
                   <Skeleton className="h-4 w-full mb-2" />
                   <Skeleton className="h-4 w-2/3 mb-4" />
                   <Skeleton className="h-10 w-full" />
@@ -98,18 +124,18 @@ export function RecoveredTab() {
             ))}
           </div>
         ) : foundObjects.length === 0 ? (
-          <Card className="border-2 border-dashed border-primary/30">
+          <Card className="border-2 border-dashed border-primary/20 rounded-2xl">
             <CardContent className="pt-12 pb-12">
               <div className="text-center space-y-4">
-                <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center">
                   <Package className="w-10 h-10 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-display font-bold text-primary mb-2">
+                  <h3 className="text-xl font-display font-bold text-primary mb-1.5">
                     Nenhum objeto disponível
                   </h3>
-                  <p className="text-muted-foreground">
-                    Seja o primeiro a adicionar um objeto encontrado
+                  <p className="text-muted-foreground text-sm">
+                    Encontrou algo? Adicione ao mural para ajudar o dono
                   </p>
                 </div>
               </div>
@@ -118,21 +144,28 @@ export function RecoveredTab() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {foundObjects.map((obj) => {
-              const isAvailable = obj.status === Variant_claimed_available.available;
+              const isAvailable =
+                obj.status === Variant_claimed_available.available;
 
               return (
-                <Card 
-                  key={obj.id.toString()} 
-                  className={`border-2 hover:shadow-lg transition-shadow ${
-                    isAvailable ? "border-primary/20" : "border-muted"
+                <Card
+                  key={obj.id.toString()}
+                  className={`border-2 hover:shadow-navy transition-all rounded-2xl ${
+                    isAvailable ? "border-primary/15" : "border-border"
                   }`}
                 >
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg font-display text-primary">
+                    <div className="flex items-start justify-between gap-3">
+                      <CardTitle className="text-base font-display text-primary leading-tight">
                         Objeto Encontrado
                       </CardTitle>
-                      <Badge variant={isAvailable ? "default" : "secondary"}>
+                      <Badge
+                        className={
+                          isAvailable
+                            ? "bg-primary/10 text-primary border-0 shrink-0"
+                            : "bg-muted text-muted-foreground border-0 shrink-0"
+                        }
+                      >
                         {isAvailable ? "Disponível" : "Reivindicado"}
                       </Badge>
                     </div>
@@ -143,17 +176,22 @@ export function RecoveredTab() {
                   <CardContent className="space-y-3">
                     <div className="flex items-start gap-2 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4 mt-0.5 text-primary shrink-0" />
-                      <span>
-                        <strong className="text-foreground">Local de entrega:</strong> {obj.location}
+                      <span className="line-clamp-2">
+                        <strong className="text-foreground">Local:</strong>{" "}
+                        {obj.location}
                       </span>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Encontrado em: {formatDate(obj.createdAt)}
+                    </p>
 
                     {isAvailable ? (
                       <Button
+                        type="button"
                         onClick={() => handleClaimObject(obj.id)}
                         disabled={isClaiming}
-                        className="w-full"
                         size="sm"
+                        className="w-full bg-primary hover:bg-primary/90"
                       >
                         {isClaiming ? (
                           <>
@@ -162,15 +200,14 @@ export function RecoveredTab() {
                           </>
                         ) : (
                           <>
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            É MEU
+                            <CheckCircle2 className="w-4 h-4 mr-2" />É MEU!
                           </>
                         )}
                       </Button>
                     ) : (
-                      <div className="text-center text-sm text-muted-foreground py-2">
-                        Este objeto já foi reivindicado
-                      </div>
+                      <p className="text-center text-sm text-muted-foreground py-1.5 bg-muted rounded-lg">
+                        Objeto já foi reivindicado
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -179,22 +216,23 @@ export function RecoveredTab() {
           </div>
         )}
 
-        {/* Info Card */}
-        <Card className="mt-8 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <p className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <span>Encontrou um objeto? Adicione ao mural para ajudar o dono a recuperá-lo</span>
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <span>Perdeu algo? Verifique os objetos disponíveis e reivindique se reconhecer</span>
-              </p>
-              <p className="flex items-start gap-2">
-                <span className="text-primary">•</span>
-                <span>Após reivindicar, dirija-se ao local indicado para recuperar seu bem</span>
-              </p>
+        {/* Info */}
+        <Card className="mt-8 border-primary/10 rounded-2xl">
+          <CardContent className="pt-5 pb-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+              Como funciona
+            </p>
+            <div className="space-y-2.5 text-sm text-muted-foreground">
+              {[
+                "Encontrou um objeto? Adicione ao mural para ajudar o dono a recuperá-lo",
+                "Perdeu algo? Verifique os objetos disponíveis e clique em 'É MEU!' se reconhecer",
+                "Após reivindicar, dirija-se ao local indicado para recuperar seu bem",
+              ].map((tip) => (
+                <p key={tip} className="flex items-start gap-2">
+                  <span className="text-primary font-bold mt-0.5">•</span>
+                  <span>{tip}</span>
+                </p>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -202,7 +240,7 @@ export function RecoveredTab() {
 
       {/* Add Found Object Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-display text-primary">
               Adicionar Objeto Encontrado
@@ -214,7 +252,10 @@ export function RecoveredTab() {
 
           <div className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-base font-semibold">
+              <Label
+                htmlFor="description"
+                className="text-sm font-semibold uppercase tracking-wide text-foreground/60"
+              >
                 Descrição do Objeto *
               </Label>
               <Textarea
@@ -228,7 +269,10 @@ export function RecoveredTab() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location" className="text-base font-semibold">
+              <Label
+                htmlFor="location"
+                className="text-sm font-semibold uppercase tracking-wide text-foreground/60"
+              >
                 Local de Entrega *
               </Label>
               <Input
@@ -243,21 +287,23 @@ export function RecoveredTab() {
               </p>
             </div>
 
-            <div className="bg-primary/5 border-2 border-primary/20 rounded-lg p-4">
-              <p className="text-sm text-foreground/80">
-                ℹ️ Seu objeto será visível no mural para que o dono possa reivindicá-lo.
+            <div className="bg-primary/5 border-2 border-primary/15 rounded-xl p-4">
+              <p className="text-sm text-foreground/70">
+                ℹ️ Seu objeto ficará visível no mural para que o dono possa
+                reivindicá-lo.
               </p>
             </div>
 
             <Button
+              type="button"
               onClick={handleAddFoundObject}
               disabled={isAdding}
-              className="w-full h-12 text-base font-bold"
+              className="w-full h-12 font-bold bg-primary hover:bg-primary/90"
             >
               {isAdding ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Adicionando...
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Publicando...
                 </>
               ) : (
                 "Publicar no Mural"

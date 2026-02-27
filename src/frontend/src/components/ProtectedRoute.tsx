@@ -1,7 +1,7 @@
-import { ReactNode, useEffect } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
+import { type ReactNode, useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -26,7 +26,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
-          <p className="text-lg text-muted-foreground">Verificando autenticação...</p>
+          <p className="text-lg text-muted-foreground">
+            Verificando autenticação...
+          </p>
         </div>
       </div>
     );

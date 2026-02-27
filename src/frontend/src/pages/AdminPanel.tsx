@@ -1,13 +1,29 @@
-import { useState, useMemo } from "react";
-import { Link } from "@tanstack/react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useGetAllLeads, useGetStats } from "@/hooks/useQueries";
-import { useAuth } from "@/contexts/AuthContext";
-import { Users, TrendingUp, Calendar, LogOut, Home, Loader2, Search, CreditCard } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGetAllLeads, useGetStats } from "@/hooks/useQueries";
+import { Link } from "@tanstack/react-router";
+import {
+  Calendar,
+  CreditCard,
+  Home,
+  Loader2,
+  LogOut,
+  Search,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useMemo, useState } from "react";
 
 export function AdminPanel() {
   const { logout } = useAuth();
@@ -17,19 +33,19 @@ export function AdminPanel() {
 
   const filteredLeads = useMemo(() => {
     if (!searchTerm.trim()) return leads;
-    
     const term = searchTerm.toLowerCase();
     return leads.filter(
       (lead) =>
         lead.name.toLowerCase().includes(term) ||
-        lead.whatsapp.includes(term.replace(/\D/g, ""))
+        lead.whatsapp.includes(term.replace(/\D/g, "")),
     );
   }, [leads, searchTerm]);
 
   const formatWhatsApp = (whatsapp: string): string => {
     const numbers = whatsapp.replace(/\D/g, "");
     if (numbers.length <= 2) return numbers;
-    if (numbers.length <= 7) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    if (numbers.length <= 7)
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
     if (numbers.length <= 11) {
       return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
     }
@@ -38,52 +54,58 @@ export function AdminPanel() {
 
   const formatTimestamp = (timestamp: bigint): string => {
     const date = new Date(Number(timestamp) / 1_000_000);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-  };
-
-  const handleLogout = () => {
-    logout();
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = date.getFullYear();
+    const h = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${d}/${m}/${y} ${h}:${min}`;
   };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-secondary border-b border-border sticky top-0 z-50 shadow-sm">
+      <header className="bg-secondary border-b border-white/10 sticky top-0 z-50 shadow-navy">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-4">
               <img
                 src="/assets/uploads/LOGO-BRANCO-1.png"
                 alt="CERC FORTALEZA"
-                className="w-auto h-12 md:h-14"
+                className="h-10 md:h-12 w-auto"
               />
-              <h1 className="text-xl md:text-2xl font-display font-bold text-primary hidden sm:block">
+              <h1 className="text-lg md:text-xl font-display font-bold text-white hidden sm:block">
                 Painel Administrativo
               </h1>
             </div>
             <div className="flex items-center gap-2">
               <Link to="/admin/stripe-config">
-                <Button variant="outline" size="sm" className="font-semibold">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="font-semibold border-white/20 text-white hover:bg-white/10 hover:text-white"
+                >
                   <CreditCard className="w-4 h-4 mr-2" />
-                  Config. Stripe
+                  Stripe
                 </Button>
               </Link>
               <Link to="/">
-                <Button variant="outline" size="sm" className="font-semibold">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="font-semibold border-white/20 text-white hover:bg-white/10 hover:text-white"
+                >
                   <Home className="w-4 h-4 mr-2" />
-                  Voltar ao Site
+                  Site
                 </Button>
               </Link>
               <Button
-                onClick={handleLogout}
-                variant="destructive"
+                type="button"
+                onClick={logout}
                 size="sm"
-                className="font-semibold bg-accent hover:bg-accent/90"
+                className="font-semibold bg-accent hover:bg-accent/90 text-white"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sair
@@ -94,77 +116,68 @@ export function AdminPanel() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total de Cadastros
-              </CardTitle>
-              <div className="w-12 h-12 bg-primary/15 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? (
-                <Skeleton className="h-10 w-24" />
-              ) : (
-                <div className="text-3xl md:text-4xl font-display font-bold text-primary">
-                  {stats?.total.toString() || "0"}
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+          {[
+            {
+              label: "Total de Cadastros",
+              value: stats?.total,
+              icon: Users,
+              color: "text-primary",
+              bg: "bg-primary/10",
+            },
+            {
+              label: "Cadastros Hoje",
+              value: stats?.today,
+              icon: TrendingUp,
+              color: "text-accent",
+              bg: "bg-accent/10",
+            },
+            {
+              label: "Esta Semana",
+              value: stats?.thisWeek,
+              icon: Calendar,
+              color: "text-primary",
+              bg: "bg-primary/10",
+            },
+          ].map(({ label, value, icon: Icon, color, bg }) => (
+            <Card
+              key={label}
+              className="border-2 border-border hover:border-primary/30 transition-colors rounded-2xl"
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {label}
+                </CardTitle>
+                <div
+                  className={`w-11 h-11 ${bg} rounded-xl flex items-center justify-center`}
+                >
+                  <Icon className={`w-5 h-5 ${color}`} />
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-accent/20 hover:border-accent/40 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Cadastros Hoje
-              </CardTitle>
-              <div className="w-12 h-12 bg-accent/15 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-accent" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? (
-                <Skeleton className="h-10 w-24" />
-              ) : (
-                <div className="text-3xl md:text-4xl font-display font-bold text-accent">
-                  {stats?.today.toString() || "0"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Cadastros Esta Semana
-              </CardTitle>
-              <div className="w-12 h-12 bg-primary/15 rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {statsLoading ? (
-                <Skeleton className="h-10 w-24" />
-              ) : (
-                <div className="text-3xl md:text-4xl font-display font-bold text-primary">
-                  {stats?.thisWeek.toString() || "0"}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                {statsLoading ? (
+                  <Skeleton className="h-9 w-20" />
+                ) : (
+                  <div
+                    className={`text-4xl font-display font-extrabold ${color} tracking-tight`}
+                  >
+                    {value?.toString() ?? "0"}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Leads Table */}
-        <Card className="border-2 border-border shadow-lg">
+        {/* Leads table */}
+        <Card className="border-2 border-border shadow-navy rounded-2xl">
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <CardTitle className="text-2xl font-display font-bold text-primary">
                 Cadastros Recebidos
               </CardTitle>
-              <div className="relative w-full sm:w-64">
+              <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   type="text"
@@ -179,19 +192,19 @@ export function AdminPanel() {
           <CardContent>
             {leadsLoading ? (
               <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
+                {["s1", "s2", "s3", "s4", "s5"].map((k) => (
+                  <Skeleton key={k} className="h-12 w-full" />
                 ))}
               </div>
             ) : filteredLeads.length === 0 ? (
               <div className="text-center py-12">
-                <Users className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
+                <Users className="w-14 h-14 mx-auto text-muted-foreground/20 mb-4" />
                 <p className="text-lg text-muted-foreground font-medium">
                   {searchTerm.trim()
                     ? "Nenhum cadastro encontrado com esse filtro"
                     : "Nenhum cadastro ainda"}
                 </p>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-sm text-muted-foreground mt-1.5">
                   {searchTerm.trim()
                     ? "Tente buscar por outro termo"
                     : "Os cadastros aparecerão aqui quando forem enviados"}
@@ -199,27 +212,35 @@ export function AdminPanel() {
               </div>
             ) : (
               <>
-                {/* Desktop Table */}
+                {/* Desktop table */}
                 <div className="hidden md:block overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-secondary/50">
-                        <TableHead className="font-bold text-primary">Nome</TableHead>
-                        <TableHead className="font-bold text-primary">WhatsApp</TableHead>
-                        <TableHead className="font-bold text-primary">Data/Hora</TableHead>
+                      <TableRow className="bg-muted/40">
+                        <TableHead className="font-bold text-primary">
+                          Nome
+                        </TableHead>
+                        <TableHead className="font-bold text-primary">
+                          WhatsApp
+                        </TableHead>
+                        <TableHead className="font-bold text-primary">
+                          Data/Hora
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredLeads.map((lead, index) => (
+                      {filteredLeads.map((lead) => (
                         <TableRow
-                          key={index}
-                          className="hover:bg-secondary/30 transition-colors"
+                          key={`${lead.whatsapp}-${lead.timestamp.toString()}`}
+                          className="hover:bg-muted/30 transition-colors"
                         >
-                          <TableCell className="font-medium">{lead.name}</TableCell>
-                          <TableCell className="font-mono">
+                          <TableCell className="font-medium">
+                            {lead.name}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
                             {formatWhatsApp(lead.whatsapp)}
                           </TableCell>
-                          <TableCell className="text-muted-foreground">
+                          <TableCell className="text-muted-foreground text-sm">
                             {formatTimestamp(lead.timestamp)}
                           </TableCell>
                         </TableRow>
@@ -228,29 +249,30 @@ export function AdminPanel() {
                   </Table>
                 </div>
 
-                {/* Mobile Cards */}
-                <div className="md:hidden space-y-4">
-                  {filteredLeads.map((lead, index) => (
-                    <Card key={index} className="border border-border">
+                {/* Mobile cards */}
+                <div className="md:hidden space-y-3">
+                  {filteredLeads.map((lead) => (
+                    <Card
+                      key={`mobile-${lead.whatsapp}-${lead.timestamp.toString()}`}
+                      className="border border-border rounded-xl"
+                    >
                       <CardContent className="p-4 space-y-2">
                         <div>
-                          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
+                          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
                             Nome
                           </p>
-                          <p className="text-base font-semibold text-foreground">
-                            {lead.name}
-                          </p>
+                          <p className="font-semibold">{lead.name}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
+                          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
                             WhatsApp
                           </p>
-                          <p className="text-base font-mono text-foreground">
+                          <p className="font-mono text-sm">
                             {formatWhatsApp(lead.whatsapp)}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">
+                          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
                             Data/Hora
                           </p>
                           <p className="text-sm text-muted-foreground">

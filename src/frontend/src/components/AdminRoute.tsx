@@ -1,10 +1,10 @@
-import { ReactNode, useEffect } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShieldAlert, Loader2, Home } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
+import { Home, Loader2, ShieldAlert } from "lucide-react";
+import { type ReactNode, useEffect } from "react";
 
 interface AdminRouteProps {
   children: ReactNode;
@@ -29,7 +29,9 @@ export function AdminRoute({ children }: AdminRouteProps) {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
           <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto" />
-          <p className="text-lg text-muted-foreground">Verificando autenticação...</p>
+          <p className="text-lg text-muted-foreground">
+            Verificando autenticação...
+          </p>
         </div>
       </div>
     );
@@ -53,10 +55,12 @@ export function AdminRoute({ children }: AdminRouteProps) {
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-base text-foreground/80 leading-relaxed">
-              Você não possui permissões de administrador para acessar esta área.
+              Você não possui permissões de administrador para acessar esta
+              área.
             </p>
             <p className="text-sm text-muted-foreground">
-              Entre em contato com um administrador do sistema para solicitar acesso.
+              Entre em contato com um administrador do sistema para solicitar
+              acesso.
             </p>
             <Link to="/">
               <Button className="w-full mt-4 bg-primary hover:bg-primary/90">

@@ -1,14 +1,28 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { Settings, CheckCircle2, AlertCircle, Loader2, ArrowLeft, ExternalLink, Info } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import { useActor } from "@/hooks/useActor";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  ExternalLink,
+  Info,
+  Loader2,
+  Settings,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export function StripeConfigPage() {
   const navigate = useNavigate();
@@ -22,7 +36,7 @@ export function StripeConfigPage() {
 
   const checkStripeStatus = useCallback(async () => {
     if (!actor) return;
-    
+
     setIsLoading(true);
     try {
       const configured = await actor.isStripeConfigured();
@@ -77,7 +91,9 @@ export function StripeConfigPage() {
       setSecretKey(""); // Limpar por segurança
     } catch (error) {
       console.error("Error saving Stripe config:", error);
-      toast.error("Erro ao salvar configuração. Verifique os dados e tente novamente.");
+      toast.error(
+        "Erro ao salvar configuração. Verifique os dados e tente novamente.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -120,7 +136,9 @@ export function StripeConfigPage() {
                 </CardTitle>
                 <div className="space-y-2 text-sm text-blue-800 dark:text-blue-200">
                   <p className="flex items-start gap-2">
-                    <span className="font-bold text-blue-600 dark:text-blue-400">1.</span>
+                    <span className="font-bold text-blue-600 dark:text-blue-400">
+                      1.
+                    </span>
                     <span>
                       Acesse o{" "}
                       <a
@@ -136,21 +154,33 @@ export function StripeConfigPage() {
                     </span>
                   </p>
                   <p className="flex items-start gap-2">
-                    <span className="font-bold text-blue-600 dark:text-blue-400">2.</span>
+                    <span className="font-bold text-blue-600 dark:text-blue-400">
+                      2.
+                    </span>
                     <span>
-                      Vá em <strong>Developers → API keys</strong> no menu lateral
+                      Vá em <strong>Developers → API keys</strong> no menu
+                      lateral
                     </span>
                   </p>
                   <p className="flex items-start gap-2">
-                    <span className="font-bold text-blue-600 dark:text-blue-400">3.</span>
+                    <span className="font-bold text-blue-600 dark:text-blue-400">
+                      3.
+                    </span>
                     <span>
-                      Copie a <strong>Secret key</strong> (começa com <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">sk_test_</code> para testes)
+                      Copie a <strong>Secret key</strong> (começa com{" "}
+                      <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">
+                        sk_test_
+                      </code>{" "}
+                      para testes)
                     </span>
                   </p>
                   <p className="flex items-start gap-2">
-                    <span className="font-bold text-blue-600 dark:text-blue-400">4.</span>
+                    <span className="font-bold text-blue-600 dark:text-blue-400">
+                      4.
+                    </span>
                     <span>
-                      Cole a chave abaixo e clique em <strong>Salvar Configuração</strong>
+                      Cole a chave abaixo e clique em{" "}
+                      <strong>Salvar Configuração</strong>
                     </span>
                   </p>
                 </div>
@@ -169,14 +199,17 @@ export function StripeConfigPage() {
               Integração de Pagamentos
             </CardTitle>
             <CardDescription className="text-base leading-relaxed">
-              Configure a integração com Stripe para processar assinaturas Premium
+              Configure a integração com Stripe para processar assinaturas
+              Premium
             </CardDescription>
 
             {/* Status Badge */}
             {isLoading ? (
               <div className="flex items-center justify-center gap-2 pt-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm text-muted-foreground">Verificando...</span>
+                <span className="text-sm text-muted-foreground">
+                  Verificando...
+                </span>
               </div>
             ) : (
               <Badge
@@ -248,12 +281,16 @@ export function StripeConfigPage() {
                   className="h-12 border-2 font-mono text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Use <strong>sk_test_</strong> para testes ou <strong>sk_live_</strong> para produção
+                  Use <strong>sk_test_</strong> para testes ou{" "}
+                  <strong>sk_live_</strong> para produção
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="allowedCountries" className="text-base font-semibold">
+                <Label
+                  htmlFor="allowedCountries"
+                  className="text-base font-semibold"
+                >
                   Países Permitidos *
                 </Label>
                 <Textarea
@@ -273,7 +310,9 @@ export function StripeConfigPage() {
             {/* Security Warning */}
             <div className="bg-yellow-50 dark:bg-yellow-950/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
               <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                ⚠️ <strong>Segurança:</strong> A Secret Key será armazenada de forma segura no backend. Nunca compartilhe esta chave publicamente.
+                ⚠️ <strong>Segurança:</strong> A Secret Key será armazenada de
+                forma segura no backend. Nunca compartilhe esta chave
+                publicamente.
               </p>
             </div>
 

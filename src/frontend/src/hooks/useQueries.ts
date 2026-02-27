@@ -1,13 +1,23 @@
+import type {
+  FoundObject,
+  Lead,
+  LeadStats,
+  ObjectType,
+  PersonalObject,
+  PublicStats,
+} from "@/backend.d";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useActor } from "./useActor";
-import type { Lead, LeadStats, PersonalObject, ObjectType, FoundObject, PublicStats } from "@/backend.d";
 
 export function useSubmitLead() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ name, whatsapp }: { name: string; whatsapp: string }) => {
+    mutationFn: async ({
+      name,
+      whatsapp,
+    }: { name: string; whatsapp: string }) => {
       if (!actor) throw new Error("Actor not initialized");
       return actor.submitLead(name, whatsapp);
     },
@@ -80,7 +90,17 @@ export function useRegisterObject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ brand, model, identifier, objType }: { brand: string; model: string; identifier: string; objType: ObjectType }) => {
+    mutationFn: async ({
+      brand,
+      model,
+      identifier,
+      objType,
+    }: {
+      brand: string;
+      model: string;
+      identifier: string;
+      objType: ObjectType;
+    }) => {
       if (!actor) throw new Error("Actor not initialized");
       return actor.registerObject(brand, model, identifier, objType);
     },
@@ -127,7 +147,7 @@ export function useReportTheft() {
         location,
         stolenPlace ?? null,
         latitudeStart ?? null,
-        longitudeStart ?? null
+        longitudeStart ?? null,
       );
     },
     onSuccess: () => {
@@ -167,7 +187,10 @@ export function useAddFoundObject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ description, location }: { description: string; location: string }) => {
+    mutationFn: async ({
+      description,
+      location,
+    }: { description: string; location: string }) => {
       if (!actor) throw new Error("Actor not initialized");
       return actor.addFoundObject(description, location);
     },
@@ -210,7 +233,12 @@ export function usePublicStats() {
 
 // --- SUBSCRIPTION & STRIPE QUERIES ---
 
-import type { SubscriptionInfo, ShoppingItem, StripeSessionStatus, SubscriptionPlan } from "@/backend.d";
+import type {
+  ShoppingItem,
+  StripeSessionStatus,
+  SubscriptionInfo,
+  SubscriptionPlan,
+} from "@/backend.d";
 
 export type CheckoutSession = {
   id: string;
@@ -274,7 +302,11 @@ export function useCreateCheckoutSession() {
     }): Promise<CheckoutSession> => {
       if (!actor) throw new Error("Actor not available");
 
-      const result = await actor.createCheckoutSession(items, successUrl, cancelUrl);
+      const result = await actor.createCheckoutSession(
+        items,
+        successUrl,
+        cancelUrl,
+      );
 
       console.log("[Stripe] Raw response:", result.substring(0, 300));
 
@@ -301,9 +333,12 @@ export function useCreateCheckoutSession() {
       }
 
       if (!url) {
-        console.error("[Stripe] Could not extract url. Response:", result.substring(0, 500));
+        console.error(
+          "[Stripe] Could not extract url. Response:",
+          result.substring(0, 500),
+        );
         throw new Error(
-          "Não foi possível obter a URL de pagamento do Stripe. Verifique as configurações."
+          "Não foi possível obter a URL de pagamento do Stripe. Verifique as configurações.",
         );
       }
 
@@ -352,7 +387,10 @@ export function useActivateMyPremium() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ sessionId, plan }: { sessionId: string; plan: SubscriptionPlan }) => {
+    mutationFn: async ({
+      sessionId,
+      plan,
+    }: { sessionId: string; plan: SubscriptionPlan }) => {
       if (!actor) throw new Error("Actor not available");
       return actor.activateMyPremium(sessionId, plan);
     },

@@ -16,8 +16,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
-        display: ['"Archivo Black"', 'system-ui', 'sans-serif'],
+        // Display / headings — bold, authoritative
+        display: ['"Bricolage Grotesque"', "system-ui", "sans-serif"],
+        // Body — clean, readable
+        sans: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
       },
       colors: {
         border: "oklch(var(--border))",
@@ -60,6 +62,13 @@ export default {
           4: "oklch(var(--chart-4))",
           5: "oklch(var(--chart-5))",
         },
+        privacy: {
+          bg: "oklch(var(--privacy-bg))",
+          navy: "oklch(var(--privacy-navy))",
+          body: "oklch(var(--privacy-body))",
+          muted: "oklch(var(--privacy-muted))",
+          border: "oklch(var(--privacy-border))",
+        },
         sidebar: {
           DEFAULT: "oklch(var(--sidebar))",
           foreground: "oklch(var(--sidebar-foreground))",
@@ -78,6 +87,8 @@ export default {
       },
       boxShadow: {
         xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
+        navy: "0 4px 24px -4px rgba(10,35,66,0.25)",
+        "navy-lg": "0 12px 48px -8px rgba(10,35,66,0.35)",
       },
       keyframes: {
         "accordion-down": {
@@ -88,10 +99,15 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "slide-up": {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "slide-up": "slide-up 0.4s ease-out",
       },
     },
   },

@@ -1,21 +1,28 @@
-import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from "@tanstack/react-router";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
-import { LandingPage } from "@/pages/LandingPage";
-import { LoginPage } from "@/pages/LoginPage";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { AppLayout } from "@/layouts/AppLayout";
 import { AdminPanel } from "@/pages/AdminPanel";
-import { OnboardingPage } from "@/pages/OnboardingPage";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { CheckoutSuccessPage } from "@/pages/CheckoutSuccessPage";
-import { AppLayout } from "@/layouts/AppLayout";
-import { SearchTab } from "@/pages/SearchTab";
-import { VaultTab } from "@/pages/VaultTab";
+import { LandingPage } from "@/pages/LandingPage";
+import { LoginPage } from "@/pages/LoginPage";
+import { OnboardingPage } from "@/pages/OnboardingPage";
+import { PlanosPage } from "@/pages/PlanosPage";
+import { PrivacyPage } from "@/pages/PrivacyPage";
 import { RecoveredTab } from "@/pages/RecoveredTab";
 import { SOSTab } from "@/pages/SOSTab";
+import { SearchTab } from "@/pages/SearchTab";
 import { StripeConfigPage } from "@/pages/StripeConfigPage";
-import { PlanosPage } from "@/pages/PlanosPage";
-import { Toaster } from "@/components/ui/sonner";
+import { VaultTab } from "@/pages/VaultTab";
+import {
+  Outlet,
+  RouterProvider,
+  createRootRoute,
+  createRoute,
+  createRouter,
+} from "@tanstack/react-router";
 
 // Define root route with layout
 const rootRoute = createRootRoute({
@@ -70,6 +77,12 @@ const planosRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/planos",
   component: PlanosPage,
+});
+
+const privacidadeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/privacidade",
+  component: PrivacyPage,
 });
 
 const checkoutRoute = createRoute({
@@ -129,12 +142,13 @@ const appSOSRoute = createRoute({
 
 // Create route tree
 const routeTree = rootRoute.addChildren([
-  indexRoute, 
-  loginRoute, 
+  indexRoute,
+  loginRoute,
   adminRoute,
   stripeConfigRoute,
   onboardingRoute,
   planosRoute,
+  privacidadeRoute,
   checkoutRoute,
   checkoutSuccessRoute,
   appRoute.addChildren([
