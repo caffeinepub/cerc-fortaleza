@@ -160,11 +160,13 @@ export function PlanosPage() {
               <span className="hidden sm:inline">Voltar</span>
             </Button>
             <div className="flex-1 flex justify-center">
-              <img
-                src="/assets/uploads/LOGO-BRANCO-1.png"
-                alt="CERC FORTALEZA"
-                className="h-10 md:h-12 w-auto object-contain"
-              />
+              <div className="bg-white rounded-lg px-3 py-1">
+                <img
+                  src="/assets/uploads/LOGO-COM-NOME-1-1.png"
+                  alt="CERC FORTALEZA"
+                  className="h-8 md:h-10 w-auto object-contain"
+                />
+              </div>
             </div>
             <div className="w-16 sm:w-20 shrink-0" />
           </div>

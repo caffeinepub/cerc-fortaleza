@@ -95,11 +95,13 @@ export function OnboardingPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
         {/* Logo */}
         <div className="flex justify-center mb-10">
-          <img
-            src="/assets/uploads/LOGO-BRANCO-1.png"
-            alt="CERC FORTALEZA"
-            className="w-full max-w-[200px] h-auto opacity-90"
-          />
+          <div className="bg-white rounded-xl px-4 py-2 shadow-md">
+            <img
+              src="/assets/uploads/LOGO-COM-NOME-1-1.png"
+              alt="CERC FORTALEZA"
+              className="w-full max-w-[180px] h-auto"
+            />
+          </div>
         </div>
 
         {/* Slide card */}

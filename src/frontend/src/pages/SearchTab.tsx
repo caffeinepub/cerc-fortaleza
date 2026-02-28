@@ -78,11 +78,13 @@ export function SearchTab() {
       <header className="bg-secondary text-white shadow-navy">
         <div className="container mx-auto px-4 py-5">
           <div className="flex justify-center mb-3">
-            <img
-              src="/assets/uploads/LOGO-BRANCO-1.png"
-              alt="CERC FORTALEZA"
-              className="h-10 w-auto"
-            />
+            <div className="bg-white rounded-lg px-3 py-1.5">
+              <img
+                src="/assets/uploads/LOGO-COM-NOME-1-1.png"
+                alt="CERC FORTALEZA"
+                className="h-9 w-auto"
+              />
+            </div>
           </div>
           <h1 className="text-2xl font-display font-bold text-center tracking-tight">
             Consultar Procedência

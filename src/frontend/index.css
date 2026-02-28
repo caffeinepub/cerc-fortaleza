@@ -31,111 +31,111 @@
 
 /* ============================================================
    DESIGN TOKENS — OKLCH (raw L C H values, no wrapper)
-   Palette:
-     Primary:   Navy Blue #0A2342  → oklch(0.22 0.09 246)
-     Accent:    Alert Red #E53E2A  → oklch(0.53 0.22 25)
-     BG:        Warm White #FAF9F7 → oklch(0.975 0.005 85)
-     Secondary: Deep Navy #0D1B2A  → oklch(0.17 0.06 246)
+   Palette (derived from new CERC logo):
+     Primary:   Deep Navy Blue #1A2B6B  → oklch(0.26 0.13 264)
+     Accent:    Cyan/Sky Blue  #4FC3E8  → oklch(0.75 0.12 215)
+     BG:        Clean White    #FAFBFF  → oklch(0.985 0.004 260)
+     Secondary: Midnight Navy  #0D1A4A  → oklch(0.19 0.10 264)
    ============================================================ */
 @layer base {
   :root {
     --radius: 0.625rem;
 
     /* Backgrounds */
-    --background: 0.975 0.005 85;
-    --foreground: 0.18 0.07 246;
+    --background: 0.985 0.004 260;
+    --foreground: 0.18 0.10 264;
 
     /* Card surfaces */
     --card: 1 0 0;
-    --card-foreground: 0.18 0.07 246;
+    --card-foreground: 0.20 0.10 264;
 
     --popover: 1 0 0;
-    --popover-foreground: 0.18 0.07 246;
+    --popover-foreground: 0.20 0.10 264;
 
-    /* Primary — Navy Blue */
-    --primary: 0.22 0.09 246;
+    /* Primary — Deep Navy Blue #1A2B6B */
+    --primary: 0.26 0.13 264;
     --primary-foreground: 0.98 0 0;
 
-    /* Secondary — Deep Navy (hero sections) */
-    --secondary: 0.17 0.06 246;
+    /* Secondary — Midnight Navy (hero sections) */
+    --secondary: 0.19 0.10 264;
     --secondary-foreground: 0.97 0 0;
 
     /* Muted */
-    --muted: 0.94 0.005 85;
-    --muted-foreground: 0.48 0.04 246;
+    --muted: 0.94 0.006 260;
+    --muted-foreground: 0.50 0.06 264;
 
-    /* Accent — Alert Red/Orange */
-    --accent: 0.53 0.22 25;
-    --accent-foreground: 0.99 0 0;
+    /* Accent — Cyan/Sky Blue #4FC3E8 */
+    --accent: 0.75 0.12 215;
+    --accent-foreground: 0.12 0.08 264;
 
-    /* Destructive */
+    /* Destructive — keep red for errors */
     --destructive: 0.53 0.22 25;
     --destructive-foreground: 0.99 0 0;
 
     /* Borders & inputs */
-    --border: 0.88 0.005 85;
-    --input: 0.88 0.005 85;
-    --ring: 0.22 0.09 246;
+    --border: 0.88 0.008 260;
+    --input: 0.88 0.008 260;
+    --ring: 0.26 0.13 264;
 
     /* Charts */
-    --chart-1: 0.22 0.09 246;
-    --chart-2: 0.53 0.22 25;
-    --chart-3: 0.50 0.07 246;
-    --chart-4: 0.75 0.04 246;
-    --chart-5: 0.94 0.005 85;
+    --chart-1: 0.26 0.13 264;
+    --chart-2: 0.75 0.12 215;
+    --chart-3: 0.50 0.09 264;
+    --chart-4: 0.70 0.08 215;
+    --chart-5: 0.94 0.006 260;
 
     /* Privacy page tokens */
-    --privacy-bg: 0.97 0.003 85;
-    --privacy-navy: 0.22 0.09 246;
-    --privacy-body: 0.32 0.05 246;
-    --privacy-muted: 0.52 0.04 246;
-    --privacy-border: 0.88 0.01 246;
+    --privacy-bg: 0.97 0.004 260;
+    --privacy-navy: 0.26 0.13 264;
+    --privacy-body: 0.32 0.07 264;
+    --privacy-muted: 0.52 0.05 264;
+    --privacy-border: 0.88 0.01 264;
 
     /* Sidebar */
-    --sidebar: 0.17 0.06 246;
+    --sidebar: 0.19 0.10 264;
     --sidebar-foreground: 0.97 0 0;
-    --sidebar-primary: 0.53 0.22 25;
-    --sidebar-primary-foreground: 0.99 0 0;
-    --sidebar-accent: 0.22 0.09 246;
+    --sidebar-primary: 0.75 0.12 215;
+    --sidebar-primary-foreground: 0.12 0.08 264;
+    --sidebar-accent: 0.26 0.13 264;
     --sidebar-accent-foreground: 0.97 0 0;
-    --sidebar-border: 0.28 0.06 246;
-    --sidebar-ring: 0.53 0.22 25;
+    --sidebar-border: 0.30 0.09 264;
+    --sidebar-ring: 0.75 0.12 215;
   }
 
   /* ---- Dark mode (intentionally unused for this app — light only) --- */
   .dark {
-    --background: 0.14 0.05 246;
+    --background: 0.14 0.07 264;
     --foreground: 0.96 0 0;
-    --card: 0.19 0.06 246;
+    --card: 0.20 0.08 264;
     --card-foreground: 0.96 0 0;
-    --popover: 0.19 0.06 246;
+    --popover: 0.20 0.08 264;
     --popover-foreground: 0.96 0 0;
-    --primary: 0.65 0.07 246;
-    --primary-foreground: 0.14 0.05 246;
-    --secondary: 0.22 0.07 246;
+    --primary: 0.70 0.10 215;
+    --primary-foreground: 0.14 0.07 264;
+    --secondary: 0.24 0.09 264;
     --secondary-foreground: 0.96 0 0;
-    --muted: 0.24 0.06 246;
-    --muted-foreground: 0.65 0.04 246;
-    --accent: 0.58 0.22 25;
-    --accent-foreground: 0.99 0 0;
+    --muted: 0.26 0.07 264;
+    --muted-foreground: 0.65 0.05 264;
+    --accent: 0.80 0.12 215;
+    --accent-foreground: 0.12 0.08 264;
     --destructive: 0.58 0.22 25;
     --destructive-foreground: 0.99 0 0;
-    --border: 0.28 0.06 246;
-    --input: 0.28 0.06 246;
-    --ring: 0.65 0.07 246;
-    --chart-1: 0.65 0.07 246;
-    --chart-2: 0.58 0.22 25;
-    --chart-3: 0.45 0.06 246;
-    --chart-4: 0.28 0.06 246;
-    --chart-5: 0.19 0.06 246;
-    --sidebar: 0.19 0.06 246;
+    --border: 0.30 0.08 264;
+    --input: 0.30 0.08 264;
+    --ring: 0.70 0.10 215;
+    --chart-1: 0.70 0.10 215;
+    --chart-2: 0.80 0.12 215;
+    --chart-3: 0.45 0.07 264;
+    --chart-4: 0.30 0.07 264;
+    --chart-5: 0.20 0.08 264;
+    --sidebar: 0.20 0.08 264;
     --sidebar-foreground: 0.96 0 0;
-    --sidebar-primary: 0.65 0.07 246;
-    --sidebar-primary-foreground: 0.96 0 0;
-    --sidebar-accent: 0.24 0.06 246;
+    --sidebar-primary: 0.70 0.10 215;
+    --sidebar-primary-foreground: 0.14 0.07 264;
+    --sidebar-accent: 0.26 0.07 264;
     --sidebar-accent-foreground: 0.96 0 0;
-    --sidebar-border: 0.28 0.06 246;
-    --sidebar-ring: 0.65 0.07 246;
+    --sidebar-border: 0.30 0.08 264;
+    --sidebar-ring: 0.70 0.10 215;
   }
 
   * {

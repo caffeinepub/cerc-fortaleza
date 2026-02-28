@@ -119,11 +119,13 @@ export function LandingPage() {
         <div className="relative z-10 container mx-auto px-4 pt-16 pb-16 md:pb-24">
           {/* Logo */}
           <div className="flex justify-center mb-10">
-            <img
-              src="/assets/uploads/LOGO-BRANCO-1.png"
-              alt="CERC FORTALEZA — Cadastro de Eletrônicos e Registros Ceará"
-              className="w-full max-w-[280px] sm:max-w-sm md:max-w-md h-auto"
-            />
+            <div className="bg-white rounded-2xl px-6 py-4 shadow-lg">
+              <img
+                src="/assets/uploads/LOGO-COM-NOME-1-1.png"
+                alt="CERC FORTALEZA — Cadastro de Eletrônicos e Registros Ceará"
+                className="w-full max-w-[240px] sm:max-w-[300px] md:max-w-[340px] h-auto"
+              />
+            </div>
           </div>
 
           <div className="max-w-4xl mx-auto text-center mb-10 md:mb-14">
@@ -262,7 +264,7 @@ export function LandingPage() {
           className="mt-12 md:mt-16 max-w-5xl mx-auto rounded-3xl overflow-hidden shadow-navy-lg"
           style={{
             background:
-              "linear-gradient(135deg, oklch(0.18 0.04 240) 0%, oklch(0.22 0.06 235) 50%, oklch(0.16 0.05 250) 100%)",
+              "linear-gradient(135deg, oklch(0.19 0.10 264) 0%, oklch(0.26 0.13 264) 50%, oklch(0.17 0.09 270) 100%)",
           }}
         >
           {/* Noise texture overlay */}
@@ -349,7 +351,7 @@ export function LandingPage() {
               <a href="#cadastro">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white font-bold text-sm sm:text-base px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+                  className="inline-flex items-center gap-2 bg-accent hover:bg-accent/80 text-accent-foreground font-bold text-sm sm:text-base px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
                 >
                   <Shield className="w-5 h-5" />
                   Cadastre-se Agora — É Grátis
@@ -436,7 +438,7 @@ export function LandingPage() {
                 aria-hidden
                 className="absolute right-0 top-0 w-1/3 h-full object-cover opacity-40"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/85 to-primary/95" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.19_0.10_264/0.97)] via-[oklch(0.26_0.13_264/0.88)] to-[oklch(0.19_0.10_264/0.97)]" />
             </div>
 
             <div className="relative z-10 px-8 py-14 md:px-16 md:py-20 text-center">
@@ -578,11 +580,13 @@ export function LandingPage() {
       <footer className="bg-secondary mt-24 border-t border-white/10">
         <div className="container mx-auto px-4 py-12 md:py-14">
           <div className="text-center mb-8">
-            <img
-              src="/assets/uploads/LOGO-BRANCO-1.png"
-              alt="CERC FORTALEZA"
-              className="h-12 w-auto mx-auto mb-4 opacity-90"
-            />
+            <div className="inline-block bg-white rounded-xl px-4 py-2 mb-4 shadow">
+              <img
+                src="/assets/uploads/LOGO-COM-NOME-1-1.png"
+                alt="CERC FORTALEZA"
+                className="h-14 w-auto"
+              />
+            </div>
             <p className="text-white/70 text-base max-w-md mx-auto leading-relaxed">
               Juntos por uma Fortaleza mais segura. Quem cadastra, não perde.
               Quem consulta, não financia o crime.

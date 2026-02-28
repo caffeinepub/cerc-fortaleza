@@ -58,7 +58,7 @@ export function LoginPage() {
         <CardHeader className="text-center space-y-4 pt-10 pb-4">
           <div className="flex justify-center mb-2">
             <img
-              src="/assets/uploads/LOGO-BRANCO-1.png"
+              src="/assets/uploads/LOGO-COM-NOME-1-1.png"
               alt="CERC FORTALEZA"
               className="w-full max-w-[220px] h-auto"
             />

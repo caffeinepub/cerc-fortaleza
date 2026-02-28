@@ -29,11 +29,13 @@ export function PrivacyPage() {
       <header className="bg-secondary">
         <div className="container mx-auto px-4 py-8 flex flex-col items-center gap-4">
           <Link to="/">
-            <img
-              src="/assets/uploads/LOGO-BRANCO-1.png"
-              alt="CERC FORTALEZA — Cadastro de Eletrônicos e Registros Ceará"
-              className="h-16 w-auto"
-            />
+            <div className="bg-white rounded-xl px-4 py-2 shadow">
+              <img
+                src="/assets/uploads/LOGO-COM-NOME-1-1.png"
+                alt="CERC FORTALEZA — Cadastro de Eletrônicos e Registros Ceará"
+                className="h-14 w-auto"
+              />
+            </div>
           </Link>
           <div className="flex items-center gap-2 text-white/70 text-sm">
             <Shield className="w-4 h-4 text-accent" />
