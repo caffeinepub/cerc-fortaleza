@@ -19,11 +19,6 @@ export interface FoundObject {
   'finder' : Principal,
   'location' : string,
 }
-export interface Lead {
-  'name' : string,
-  'whatsapp' : string,
-  'timestamp' : bigint,
-}
 export interface LeadStats {
   'today' : bigint,
   'total' : bigint,
@@ -95,10 +90,21 @@ export interface TransformationOutput {
   'body' : Uint8Array,
   'headers' : Array<http_header>,
 }
+export interface UserAdminView {
+  'principal' : Principal,
+  'subscription' : [] | [UserSubscription],
+  'isBlocked' : boolean,
+  'profile' : [] | [UserProfile],
+}
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface UserSubscription {
+  'plan' : SubscriptionPlan,
+  'expirationDate' : [] | [bigint],
+  'stripeCustomerId' : [] | [string],
+}
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
@@ -136,6 +142,7 @@ export interface _SERVICE {
   'activateMyPremium' : ActorMethod<[string, SubscriptionPlan], undefined>,
   'addFoundObject' : ActorMethod<[string, string], bigint>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'blockUser' : ActorMethod<[Principal], undefined>,
   'canRegisterMoreObjects' : ActorMethod<[], boolean>,
   'claimFoundObject' : ActorMethod<[bigint], undefined>,
   'createCheckoutSession' : ActorMethod<
@@ -143,7 +150,7 @@ export interface _SERVICE {
     string
   >,
   'findMoreObjects' : ActorMethod<[string], Array<PersonalObject>>,
-  'getAllLeads' : ActorMethod<[], Array<Lead>>,
+  'getAllUsersAdmin' : ActorMethod<[], Array<UserAdminView>>,
   'getAvailableFoundObjects' : ActorMethod<[], Array<FoundObject>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
@@ -156,8 +163,10 @@ export interface _SERVICE {
   'getStats' : ActorMethod<[], LeadStats>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isAdminPasswordSet' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
+  'isUserBlocked' : ActorMethod<[Principal], boolean>,
   'promoteToAdmin' : ActorMethod<[Principal], undefined>,
   'publicObjectSearch' : ActorMethod<[string], string>,
   'registerObject' : ActorMethod<[string, string, string, ObjectType], bigint>,
@@ -176,13 +185,16 @@ export interface _SERVICE {
     undefined
   >,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setAdminPassword' : ActorMethod<[string], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'submitLead' : ActorMethod<[string, string], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
+  'unblockUser' : ActorMethod<[Principal], undefined>,
   'upgradeToPremium' : ActorMethod<
     [SubscriptionPlan, string, bigint],
     undefined
   >,
+  'verifyAdminPassword' : ActorMethod<[string], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

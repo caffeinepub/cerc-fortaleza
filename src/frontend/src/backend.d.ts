@@ -7,8 +7,11 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export interface UserProfile {
-    name: string;
+export interface UserAdminView {
+    principal: Principal;
+    subscription?: UserSubscription;
+    isBlocked: boolean;
+    profile?: UserProfile;
 }
 export interface TransformationOutput {
     status: bigint;
@@ -86,11 +89,6 @@ export interface ShoppingItem {
     priceInCents: bigint;
     productDescription: string;
 }
-export interface Lead {
-    name: string;
-    whatsapp: string;
-    timestamp: bigint;
-}
 export interface TransformationInput {
     context: Uint8Array;
     response: http_request_result;
@@ -107,9 +105,17 @@ export type StripeSessionStatus = {
         error: string;
     };
 };
+export interface UserSubscription {
+    plan: SubscriptionPlan;
+    expirationDate?: bigint;
+    stripeCustomerId?: string;
+}
 export interface StripeConfiguration {
     allowedCountries: Array<string>;
     secretKey: string;
+}
+export interface UserProfile {
+    name: string;
 }
 export interface TheftInfo {
     latitude: bigint;
@@ -140,11 +146,12 @@ export interface backendInterface {
     activateMyPremium(sessionId: string, plan: SubscriptionPlan): Promise<void>;
     addFoundObject(description: string, location: string): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    blockUser(user: Principal): Promise<void>;
     canRegisterMoreObjects(): Promise<boolean>;
     claimFoundObject(foundObjectId: bigint): Promise<void>;
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     findMoreObjects(_objectType: string): Promise<Array<PersonalObject>>;
-    getAllLeads(): Promise<Array<Lead>>;
+    getAllUsersAdmin(): Promise<Array<UserAdminView>>;
     getAvailableFoundObjects(): Promise<Array<FoundObject>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
@@ -157,15 +164,20 @@ export interface backendInterface {
     getStats(): Promise<LeadStats>;
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    isAdminPasswordSet(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
+    isUserBlocked(user: Principal): Promise<boolean>;
     promoteToAdmin(user: Principal): Promise<void>;
     publicObjectSearch(identifier: string): Promise<string>;
     registerObject(brand: string, model: string, identifier: string, objType: ObjectType): Promise<bigint>;
     reportTheft(objectId: bigint, boNumber: string, latitude: bigint, longitude: bigint, date: bigint, location: string, stolenPlace: string | null, latitudeStart: bigint | null, longitudeStart: bigint | null): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    setAdminPassword(hash: string): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     submitLead(name: string, whatsapp: string): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
+    unblockUser(user: Principal): Promise<void>;
     upgradeToPremium(plan: SubscriptionPlan, stripeCustomerId: string, expirationDate: bigint): Promise<void>;
+    verifyAdminPassword(hash: string): Promise<boolean>;
 }

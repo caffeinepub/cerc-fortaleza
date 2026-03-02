@@ -1,3 +1,4 @@
+import { AdminPasswordGate } from "@/components/AdminPasswordGate";
 import { AdminRoute } from "@/components/AdminRoute";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Toaster } from "@/components/ui/sonner";
@@ -52,7 +53,9 @@ const adminRoute = createRoute({
   path: "/admin",
   component: () => (
     <AdminRoute>
-      <AdminPanel />
+      <AdminPasswordGate>
+        <AdminPanel />
+      </AdminPasswordGate>
     </AdminRoute>
   ),
 });
@@ -62,7 +65,9 @@ const stripeConfigRoute = createRoute({
   path: "/admin/stripe-config",
   component: () => (
     <AdminRoute>
-      <StripeConfigPage />
+      <AdminPasswordGate>
+        <StripeConfigPage />
+      </AdminPasswordGate>
     </AdminRoute>
   ),
 });

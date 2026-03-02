@@ -10,17 +10,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetAllLeads, useGetStats } from "@/hooks/useQueries";
+import { UserManagementTab } from "@/pages/UserManagementTab";
 import { Link } from "@tanstack/react-router";
 import {
   Calendar,
+  ClipboardList,
   CreditCard,
   Home,
   Loader2,
   LogOut,
   Search,
   TrendingUp,
+  UserCog,
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -107,7 +111,7 @@ export function AdminPanel() {
                 type="button"
                 onClick={logout}
                 size="sm"
-                className="font-semibold bg-accent hover:bg-accent/90 text-white"
+                className="font-semibold bg-accent hover:bg-accent/90 text-accent-foreground"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sair
@@ -172,129 +176,157 @@ export function AdminPanel() {
           ))}
         </div>
 
-        {/* Leads table */}
-        <Card className="border-2 border-border shadow-navy rounded-2xl">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <CardTitle className="text-2xl font-display font-bold text-primary">
-                Cadastros Recebidos
-              </CardTitle>
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Buscar por nome ou telefone"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-2 focus-visible:ring-primary"
-                />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {leadsLoading ? (
-              <div className="space-y-3">
-                {["s1", "s2", "s3", "s4", "s5"].map((k) => (
-                  <Skeleton key={k} className="h-12 w-full" />
-                ))}
-              </div>
-            ) : filteredLeads.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="w-14 h-14 mx-auto text-muted-foreground/20 mb-4" />
-                <p className="text-lg text-muted-foreground font-medium">
-                  {searchTerm.trim()
-                    ? "Nenhum cadastro encontrado com esse filtro"
-                    : "Nenhum cadastro ainda"}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1.5">
-                  {searchTerm.trim()
-                    ? "Tente buscar por outro termo"
-                    : "Os cadastros aparecerão aqui quando forem enviados"}
-                </p>
-              </div>
-            ) : (
-              <>
-                {/* Desktop table */}
-                <div className="hidden md:block overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/40">
-                        <TableHead className="font-bold text-primary">
-                          Nome
-                        </TableHead>
-                        <TableHead className="font-bold text-primary">
-                          WhatsApp
-                        </TableHead>
-                        <TableHead className="font-bold text-primary">
-                          Data/Hora
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+        {/* Tabs */}
+        <Tabs defaultValue="cadastros">
+          <TabsList className="mb-6 bg-muted/60 border border-border rounded-xl p-1 h-auto">
+            <TabsTrigger
+              value="cadastros"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-lg px-5 py-2.5 font-semibold transition-all flex items-center gap-2"
+            >
+              <ClipboardList className="w-4 h-4" />
+              Cadastros
+            </TabsTrigger>
+            <TabsTrigger
+              value="usuarios"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-lg px-5 py-2.5 font-semibold transition-all flex items-center gap-2"
+            >
+              <UserCog className="w-4 h-4" />
+              Usuários
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Cadastros Tab */}
+          <TabsContent value="cadastros">
+            <Card className="border-2 border-border shadow-navy rounded-2xl">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <CardTitle className="text-2xl font-display font-bold text-primary">
+                    Cadastros Recebidos
+                  </CardTitle>
+                  <div className="relative w-full sm:w-72">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Buscar por nome ou telefone"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 border-2 focus-visible:ring-primary"
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {leadsLoading ? (
+                  <div className="space-y-3">
+                    {["s1", "s2", "s3", "s4", "s5"].map((k) => (
+                      <Skeleton key={k} className="h-12 w-full" />
+                    ))}
+                  </div>
+                ) : filteredLeads.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="w-14 h-14 mx-auto text-muted-foreground/20 mb-4" />
+                    <p className="text-lg text-muted-foreground font-medium">
+                      {searchTerm.trim()
+                        ? "Nenhum cadastro encontrado com esse filtro"
+                        : "Nenhum cadastro ainda"}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1.5">
+                      {searchTerm.trim()
+                        ? "Tente buscar por outro termo"
+                        : "Os cadastros aparecerão aqui quando forem enviados"}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Desktop table */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-muted/40">
+                            <TableHead className="font-bold text-primary">
+                              Nome
+                            </TableHead>
+                            <TableHead className="font-bold text-primary">
+                              WhatsApp
+                            </TableHead>
+                            <TableHead className="font-bold text-primary">
+                              Data/Hora
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredLeads.map((lead) => (
+                            <TableRow
+                              key={`${lead.whatsapp}-${lead.timestamp.toString()}`}
+                              className="hover:bg-muted/30 transition-colors"
+                            >
+                              <TableCell className="font-medium">
+                                {lead.name}
+                              </TableCell>
+                              <TableCell className="font-mono text-sm">
+                                {formatWhatsApp(lead.whatsapp)}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground text-sm">
+                                {formatTimestamp(lead.timestamp)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile cards */}
+                    <div className="md:hidden space-y-3">
                       {filteredLeads.map((lead) => (
-                        <TableRow
-                          key={`${lead.whatsapp}-${lead.timestamp.toString()}`}
-                          className="hover:bg-muted/30 transition-colors"
+                        <Card
+                          key={`mobile-${lead.whatsapp}-${lead.timestamp.toString()}`}
+                          className="border border-border rounded-xl"
                         >
-                          <TableCell className="font-medium">
-                            {lead.name}
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {formatWhatsApp(lead.whatsapp)}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">
-                            {formatTimestamp(lead.timestamp)}
-                          </TableCell>
-                        </TableRow>
+                          <CardContent className="p-4 space-y-2">
+                            <div>
+                              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
+                                Nome
+                              </p>
+                              <p className="font-semibold">{lead.name}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
+                                WhatsApp
+                              </p>
+                              <p className="font-mono text-sm">
+                                {formatWhatsApp(lead.whatsapp)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
+                                Data/Hora
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatTimestamp(lead.timestamp)}
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
                       ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    </div>
 
-                {/* Mobile cards */}
-                <div className="md:hidden space-y-3">
-                  {filteredLeads.map((lead) => (
-                    <Card
-                      key={`mobile-${lead.whatsapp}-${lead.timestamp.toString()}`}
-                      className="border border-border rounded-xl"
-                    >
-                      <CardContent className="p-4 space-y-2">
-                        <div>
-                          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
-                            Nome
-                          </p>
-                          <p className="font-semibold">{lead.name}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
-                            WhatsApp
-                          </p>
-                          <p className="font-mono text-sm">
-                            {formatWhatsApp(lead.whatsapp)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide mb-0.5">
-                            Data/Hora
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatTimestamp(lead.timestamp)}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {searchTerm.trim() && (
-                  <p className="text-sm text-muted-foreground text-center mt-4">
-                    Mostrando {filteredLeads.length} de {leads.length} cadastros
-                  </p>
+                    {searchTerm.trim() && (
+                      <p className="text-sm text-muted-foreground text-center mt-4">
+                        Mostrando {filteredLeads.length} de {leads.length}{" "}
+                        cadastros
+                      </p>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Usuários Tab */}
+          <TabsContent value="usuarios">
+            <UserManagementTab />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

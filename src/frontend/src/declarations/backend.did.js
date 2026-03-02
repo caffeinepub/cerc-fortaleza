@@ -67,10 +67,17 @@ export const PersonalObject = IDL.Record({
   'brand' : IDL.Text,
   'identifier' : IDL.Text,
 });
-export const Lead = IDL.Record({
-  'name' : IDL.Text,
-  'whatsapp' : IDL.Text,
-  'timestamp' : IDL.Int,
+export const UserSubscription = IDL.Record({
+  'plan' : SubscriptionPlan,
+  'expirationDate' : IDL.Opt(IDL.Int),
+  'stripeCustomerId' : IDL.Opt(IDL.Text),
+});
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const UserAdminView = IDL.Record({
+  'principal' : IDL.Principal,
+  'subscription' : IDL.Opt(UserSubscription),
+  'isBlocked' : IDL.Bool,
+  'profile' : IDL.Opt(UserProfile),
 });
 export const FoundObject = IDL.Record({
   'id' : IDL.Nat,
@@ -80,7 +87,6 @@ export const FoundObject = IDL.Record({
   'finder' : IDL.Principal,
   'location' : IDL.Text,
 });
-export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const SubscriptionInfo = IDL.Record({
   'isExpired' : IDL.Bool,
   'plan' : SubscriptionPlan,
@@ -159,6 +165,7 @@ export const idlService = IDL.Service({
   'activateMyPremium' : IDL.Func([IDL.Text, SubscriptionPlan], [], []),
   'addFoundObject' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'blockUser' : IDL.Func([IDL.Principal], [], []),
   'canRegisterMoreObjects' : IDL.Func([], [IDL.Bool], ['query']),
   'claimFoundObject' : IDL.Func([IDL.Nat], [], []),
   'createCheckoutSession' : IDL.Func(
@@ -171,7 +178,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(PersonalObject)],
       ['query'],
     ),
-  'getAllLeads' : IDL.Func([], [IDL.Vec(Lead)], ['query']),
+  'getAllUsersAdmin' : IDL.Func([], [IDL.Vec(UserAdminView)], []),
   'getAvailableFoundObjects' : IDL.Func([], [IDL.Vec(FoundObject)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
@@ -196,8 +203,10 @@ export const idlService = IDL.Service({
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'isAdminPasswordSet' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+  'isUserBlocked' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
   'promoteToAdmin' : IDL.Func([IDL.Principal], [], []),
   'publicObjectSearch' : IDL.Func([IDL.Text], [IDL.Text], ['query']),
   'registerObject' : IDL.Func(
@@ -221,6 +230,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'setAdminPassword' : IDL.Func([IDL.Text], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
   'submitLead' : IDL.Func([IDL.Text, IDL.Text], [], []),
   'transform' : IDL.Func(
@@ -228,7 +238,9 @@ export const idlService = IDL.Service({
       [TransformationOutput],
       ['query'],
     ),
+  'unblockUser' : IDL.Func([IDL.Principal], [], []),
   'upgradeToPremium' : IDL.Func([SubscriptionPlan, IDL.Text, IDL.Int], [], []),
+  'verifyAdminPassword' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
 });
 
 export const idlInitArgs = [];
@@ -290,10 +302,17 @@ export const idlFactory = ({ IDL }) => {
     'brand' : IDL.Text,
     'identifier' : IDL.Text,
   });
-  const Lead = IDL.Record({
-    'name' : IDL.Text,
-    'whatsapp' : IDL.Text,
-    'timestamp' : IDL.Int,
+  const UserSubscription = IDL.Record({
+    'plan' : SubscriptionPlan,
+    'expirationDate' : IDL.Opt(IDL.Int),
+    'stripeCustomerId' : IDL.Opt(IDL.Text),
+  });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const UserAdminView = IDL.Record({
+    'principal' : IDL.Principal,
+    'subscription' : IDL.Opt(UserSubscription),
+    'isBlocked' : IDL.Bool,
+    'profile' : IDL.Opt(UserProfile),
   });
   const FoundObject = IDL.Record({
     'id' : IDL.Nat,
@@ -303,7 +322,6 @@ export const idlFactory = ({ IDL }) => {
     'finder' : IDL.Principal,
     'location' : IDL.Text,
   });
-  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const SubscriptionInfo = IDL.Record({
     'isExpired' : IDL.Bool,
     'plan' : SubscriptionPlan,
@@ -379,6 +397,7 @@ export const idlFactory = ({ IDL }) => {
     'activateMyPremium' : IDL.Func([IDL.Text, SubscriptionPlan], [], []),
     'addFoundObject' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'blockUser' : IDL.Func([IDL.Principal], [], []),
     'canRegisterMoreObjects' : IDL.Func([], [IDL.Bool], ['query']),
     'claimFoundObject' : IDL.Func([IDL.Nat], [], []),
     'createCheckoutSession' : IDL.Func(
@@ -391,7 +410,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(PersonalObject)],
         ['query'],
       ),
-    'getAllLeads' : IDL.Func([], [IDL.Vec(Lead)], ['query']),
+    'getAllUsersAdmin' : IDL.Func([], [IDL.Vec(UserAdminView)], []),
     'getAvailableFoundObjects' : IDL.Func(
         [],
         [IDL.Vec(FoundObject)],
@@ -420,8 +439,10 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'isAdminPasswordSet' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
+    'isUserBlocked' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
     'promoteToAdmin' : IDL.Func([IDL.Principal], [], []),
     'publicObjectSearch' : IDL.Func([IDL.Text], [IDL.Text], ['query']),
     'registerObject' : IDL.Func(
@@ -445,6 +466,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'setAdminPassword' : IDL.Func([IDL.Text], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
     'submitLead' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'transform' : IDL.Func(
@@ -452,11 +474,13 @@ export const idlFactory = ({ IDL }) => {
         [TransformationOutput],
         ['query'],
       ),
+    'unblockUser' : IDL.Func([IDL.Principal], [], []),
     'upgradeToPremium' : IDL.Func(
         [SubscriptionPlan, IDL.Text, IDL.Int],
         [],
         [],
       ),
+    'verifyAdminPassword' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   });
 };
 

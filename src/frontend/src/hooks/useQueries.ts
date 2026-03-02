@@ -1,6 +1,5 @@
 import type {
   FoundObject,
-  Lead,
   LeadStats,
   ObjectType,
   PersonalObject,
@@ -8,6 +7,13 @@ import type {
 } from "@/backend.d";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useActor } from "./useActor";
+
+// Lead type — defined locally since it may not be exported from backend.d.ts
+export interface Lead {
+  name: string;
+  whatsapp: string;
+  timestamp: bigint;
+}
 
 export function useSubmitLead() {
   const { actor } = useActor();
@@ -35,7 +41,8 @@ export function useGetAllLeads() {
     queryKey: ["leads"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllLeads();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (actor as any).getAllLeads();
     },
     enabled: !!actor && !isFetching,
     staleTime: 30000,
@@ -397,6 +404,95 @@ export function useActivateMyPremium() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mySubscription"] });
       queryClient.invalidateQueries({ queryKey: ["canRegisterMoreObjects"] });
+    },
+  });
+}
+
+// --- ADMIN USER MANAGEMENT QUERIES ---
+
+import type { UserAdminView } from "@/backend.d";
+import type { Principal } from "@icp-sdk/core/principal";
+
+export function useGetAllUsersAdmin() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<UserAdminView[]>({
+    queryKey: ["allUsersAdmin"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllUsersAdmin();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 15000,
+  });
+}
+
+export function useIsAdminPasswordSet() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ["isAdminPasswordSet"],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isAdminPasswordSet();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 60000,
+  });
+}
+
+export function useSetAdminPassword() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (hash: string) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setAdminPassword(hash);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["isAdminPasswordSet"] });
+    },
+  });
+}
+
+export function useVerifyAdminPassword() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async (hash: string): Promise<boolean> => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.verifyAdminPassword(hash);
+    },
+  });
+}
+
+export function useBlockUser() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (user: Principal) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.blockUser(user);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allUsersAdmin"] });
+    },
+  });
+}
+
+export function useUnblockUser() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (user: Principal) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.unblockUser(user);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allUsersAdmin"] });
     },
   });
 }
