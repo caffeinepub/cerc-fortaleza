@@ -7,6 +7,7 @@ import { AppLayout } from "@/layouts/AppLayout";
 import { AdminPanel } from "@/pages/AdminPanel";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { CheckoutSuccessPage } from "@/pages/CheckoutSuccessPage";
+import { HeatMapTab } from "@/pages/HeatMapTab";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { OnboardingPage } from "@/pages/OnboardingPage";
@@ -145,6 +146,12 @@ const appSOSRoute = createRoute({
   component: SOSTab,
 });
 
+const appMapRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/mapa",
+  component: HeatMapTab,
+});
+
 // Create route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -161,6 +168,7 @@ const routeTree = rootRoute.addChildren([
     appVaultRoute,
     appRecoveredRoute,
     appSOSRoute,
+    appMapRoute,
   ]),
 ]);
 

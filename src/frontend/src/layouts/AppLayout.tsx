@@ -1,11 +1,12 @@
 import { cn } from "@/lib/utils";
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { Package, Phone, Search, Shield } from "lucide-react";
+import { MapPin, Package, Phone, Search, Shield } from "lucide-react";
 
 const tabs = [
   { path: "/app/home", icon: Search, label: "Busca" },
   { path: "/app/vault", icon: Shield, label: "Meu Baú" },
   { path: "/app/recovered", icon: Package, label: "Recuperados" },
+  { path: "/app/mapa", icon: MapPin, label: "Mapa" },
   { path: "/app/sos", icon: Phone, label: "Guia SOS" },
 ];
 
