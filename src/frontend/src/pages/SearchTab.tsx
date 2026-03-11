@@ -8,12 +8,20 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { usePublicSearch, usePublicStats } from "@/hooks/useQueries";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { usePublicStats, useSearchAndAlert } from "@/hooks/useQueries";
 import {
   AlertTriangle,
   CheckCircle2,
   Database,
   Loader2,
+  MapPin,
   RefreshCw,
   Search,
   ShieldAlert,
@@ -21,14 +29,48 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
+const FORTALEZA_NEIGHBORHOODS = [
+  "Fortaleza",
+  "Aldeota",
+  "Meireles",
+  "Iracema",
+  "Centro",
+  "Barra do Ceará",
+  "Benfica",
+  "Messejana",
+  "Mondubim",
+  "Parangaba",
+  "Caucaia",
+  "Maraponga",
+  "Fátima",
+  "Luciano Cavalcante",
+  "Sapiranga",
+  "Edson Queiroz",
+  "Lagoa Redonda",
+  "Parque Dois Irmãos",
+  "Itaperi",
+  "Damas",
+  "Montese",
+  "José de Alencar",
+  "Cidade dos Funcionários",
+  "Água Fria",
+  "São João do Tauape",
+  "Passaré",
+  "Conjunto Ceará",
+  "Granja Lisboa",
+  "Antônio Bezerra",
+  "Siqueira",
+];
+
 export function SearchTab() {
   const [identifier, setIdentifier] = useState("");
+  const [region, setRegion] = useState("Fortaleza");
   const [searchResult, setSearchResult] = useState<{
     status: "safe" | "stolen";
     location?: string;
   } | null>(null);
 
-  const { mutate: search, isPending } = usePublicSearch();
+  const { mutate: search, isPending } = useSearchAndAlert();
   const { data: stats } = usePublicStats();
 
   const handleSearch = () => {
@@ -38,27 +80,30 @@ export function SearchTab() {
       return;
     }
 
-    search(trimmed, {
-      onSuccess: (result) => {
-        if (result === "Sem restricoes") {
-          setSearchResult({ status: "safe" });
-        } else {
-          try {
-            const parsed = JSON.parse(result) as { local?: string };
-            setSearchResult({
-              status: "stolen",
-              location: parsed.local ?? "Local desconhecido",
-            });
-          } catch {
+    search(
+      { identifier: trimmed, region },
+      {
+        onSuccess: (result) => {
+          if (result === "Sem restricoes") {
             setSearchResult({ status: "safe" });
+          } else {
+            try {
+              const parsed = JSON.parse(result) as { local?: string };
+              setSearchResult({
+                status: "stolen",
+                location: parsed.local ?? "Local desconhecido",
+              });
+            } catch {
+              setSearchResult({ status: "safe" });
+            }
           }
-        }
+        },
+        onError: (error) => {
+          console.error("Search error:", error);
+          toast.error("Erro ao realizar busca. Tente novamente.");
+        },
       },
-      onError: (error) => {
-        console.error("Search error:", error);
-        toast.error("Erro ao realizar busca. Tente novamente.");
-      },
-    });
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -163,7 +208,39 @@ export function SearchTab() {
                 disabled={isPending}
                 className="h-12 text-base border-2 focus-visible:ring-primary focus-visible:border-primary"
                 autoComplete="off"
+                data-ocid="search.input"
               />
+            </div>
+
+            {/* Region selector */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold uppercase tracking-wide text-foreground/60">
+                <MapPin className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
+                Sua Região
+              </Label>
+              <Select
+                value={region}
+                onValueChange={setRegion}
+                disabled={isPending}
+              >
+                <SelectTrigger
+                  className="h-12 border-2 focus:ring-primary"
+                  data-ocid="search.select"
+                >
+                  <SelectValue placeholder="Selecione seu bairro" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FORTALEZA_NEIGHBORHOODS.map((neighborhood) => (
+                    <SelectItem key={neighborhood} value={neighborhood}>
+                      {neighborhood}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Sua região é usada para gerar alertas de proximidade para
+                usuários Premium com objetos similares.
+              </p>
             </div>
 
             <div className="flex gap-3">
@@ -172,6 +249,7 @@ export function SearchTab() {
                 onClick={handleSearch}
                 disabled={isPending || identifier.trim().length < 6}
                 className="flex-1 h-12 font-bold bg-primary hover:bg-primary/90"
+                data-ocid="search.primary_button"
               >
                 {isPending ? (
                   <>
@@ -191,6 +269,7 @@ export function SearchTab() {
                   variant="outline"
                   onClick={handleReset}
                   className="h-12 px-4 border-2"
+                  data-ocid="search.secondary_button"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>
@@ -266,7 +345,7 @@ export function SearchTab() {
                 {[
                   "Consultas são totalmente gratuitas e ilimitadas",
                   "Verifique sempre antes de comprar um produto usado",
-                  "Ajude a combater o comércio de objetos roubados em Fortaleza",
+                  "Usuários Premium recebem alertas quando objetos similares são consultados na sua região",
                 ].map((tip) => (
                   <p key={tip} className="flex items-start gap-2">
                     <span className="text-primary font-bold mt-0.5">•</span>

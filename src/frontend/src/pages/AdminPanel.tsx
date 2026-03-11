@@ -13,6 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGetAllLeads, useGetStats } from "@/hooks/useQueries";
+import { PartnersAdminTab } from "@/pages/PartnersAdminTab";
 import { UserManagementTab } from "@/pages/UserManagementTab";
 import { Link } from "@tanstack/react-router";
 import {
@@ -20,9 +21,9 @@ import {
   ClipboardList,
   CreditCard,
   Home,
-  Loader2,
   LogOut,
   Search,
+  Store,
   TrendingUp,
   UserCog,
   Users,
@@ -178,7 +179,7 @@ export function AdminPanel() {
 
         {/* Tabs */}
         <Tabs defaultValue="cadastros">
-          <TabsList className="mb-6 bg-muted/60 border border-border rounded-xl p-1 h-auto">
+          <TabsList className="mb-6 bg-muted/60 border border-border rounded-xl p-1 h-auto flex-wrap gap-1">
             <TabsTrigger
               value="cadastros"
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-lg px-5 py-2.5 font-semibold transition-all flex items-center gap-2"
@@ -192,6 +193,13 @@ export function AdminPanel() {
             >
               <UserCog className="w-4 h-4" />
               Usuários
+            </TabsTrigger>
+            <TabsTrigger
+              value="lojas"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-lg px-5 py-2.5 font-semibold transition-all flex items-center gap-2"
+            >
+              <Store className="w-4 h-4" />
+              Lojas
             </TabsTrigger>
           </TabsList>
 
@@ -325,6 +333,15 @@ export function AdminPanel() {
           {/* Usuários Tab */}
           <TabsContent value="usuarios">
             <UserManagementTab />
+          </TabsContent>
+
+          {/* Lojas Tab */}
+          <TabsContent value="lojas">
+            <Card className="border-2 border-border shadow-navy rounded-2xl">
+              <CardContent className="p-6">
+                <PartnersAdminTab />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>

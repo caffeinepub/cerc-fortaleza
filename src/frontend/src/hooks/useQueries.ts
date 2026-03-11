@@ -496,3 +496,81 @@ export function useUnblockUser() {
     },
   });
 }
+
+// --- PROXIMITY ALERTS ---
+
+export interface ProximityAlert {
+  id: bigint;
+  objectType: string;
+  searchedIdentifier: string;
+  searcherRegion: string;
+  timestamp: bigint;
+  isRead: boolean;
+}
+
+export function useMyAlerts() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<ProximityAlert[]>({
+    queryKey: ["myAlerts"],
+    queryFn: async () => {
+      if (!actor) return [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (actor as any).getMyAlerts();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 15000,
+  });
+}
+
+export function useUnreadAlertCount() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<bigint>({
+    queryKey: ["unreadAlertCount"],
+    queryFn: async () => {
+      if (!actor) return BigInt(0);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (actor as any).getUnreadAlertCount();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 15000,
+    refetchInterval: 30000,
+  });
+}
+
+export function useMarkAlertsRead() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error("Actor not available");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (actor as any).markAlertsRead();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["myAlerts"] });
+      queryClient.invalidateQueries({ queryKey: ["unreadAlertCount"] });
+    },
+  });
+}
+
+export function useSearchAndAlert() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      identifier,
+      region,
+    }: { identifier: string; region: string }): Promise<string> => {
+      if (!actor) throw new Error("Actor not initialized");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (actor as any).searchAndAlert(identifier, region);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["unreadAlertCount"] });
+    },
+  });
+}

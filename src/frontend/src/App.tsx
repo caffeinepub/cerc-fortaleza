@@ -5,11 +5,13 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/layouts/AppLayout";
 import { AdminPanel } from "@/pages/AdminPanel";
+import { AlertasTab } from "@/pages/AlertasTab";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { CheckoutSuccessPage } from "@/pages/CheckoutSuccessPage";
 import { HeatMapTab } from "@/pages/HeatMapTab";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
+import { LojasPage } from "@/pages/LojasPage";
 import { OnboardingPage } from "@/pages/OnboardingPage";
 import { PlanosPage } from "@/pages/PlanosPage";
 import { PrivacyPage } from "@/pages/PrivacyPage";
@@ -91,6 +93,12 @@ const privacidadeRoute = createRoute({
   component: PrivacyPage,
 });
 
+const lojasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/lojas",
+  component: LojasPage,
+});
+
 const checkoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/checkout",
@@ -152,6 +160,12 @@ const appMapRoute = createRoute({
   component: HeatMapTab,
 });
 
+const appAlertasRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: "/alertas",
+  component: AlertasTab,
+});
+
 // Create route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -161,6 +175,7 @@ const routeTree = rootRoute.addChildren([
   onboardingRoute,
   planosRoute,
   privacidadeRoute,
+  lojasRoute,
   checkoutRoute,
   checkoutSuccessRoute,
   appRoute.addChildren([
@@ -169,6 +184,7 @@ const routeTree = rootRoute.addChildren([
     appRecoveredRoute,
     appSOSRoute,
     appMapRoute,
+    appAlertasRoute,
   ]),
 ]);
 
